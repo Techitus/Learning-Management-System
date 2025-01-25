@@ -6,6 +6,10 @@ if(!MONGODBCS){
     throw new Error('No MongoDB connection string found')
 }
 const dbConnect = async()=>{
+  if(mongoose.connection.readyState === 1){
+    console.log('Database already connected')
+    return  // already connected to the database
+  }
     try{
       await  mongoose.connect(MONGODBCS)
       console.log("Database connection established")
