@@ -18,5 +18,6 @@ const courseSchema = new Schema({
     },
 
 })
+
 const Courses =mongoose.model("courses", courseSchema)
 export default Courses
