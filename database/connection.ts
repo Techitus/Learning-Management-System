@@ -1,21 +1,22 @@
 import mongoose from "mongoose";
 
-const MONGODBCS =process.env.MONGODB_CS 
+const MONGODB_CS = process.env.MONGODB_CS
 
-if(!MONGODBCS){
-    throw new Error('No MongoDB connection string found')
+if(!MONGODB_CS){
+    throw new Error("You must provide Mongodb Connection String")
 }
-const dbConnect = async()=>{
-  if(mongoose.connection.readyState === 1){
-    console.log('Database already connected')
-    return  // already connected to the database
-  }
-    try{
-      await  mongoose.connect(MONGODBCS)
-      console.log("Database connection established")
-    }catch(error){
-      console.error('Error while connecting to MongoDB....',error)
-      process.exit(1)
+
+const dbConnect = async ()=>{
+    if(mongoose.connection.readyState === 1){
+        console.log("Database already connected!!")
+        return;
+    }
+    try {
+        await mongoose.connect(MONGODB_CS)
+        console.log("Database connected successfully 😄")
+    } catch (error) {
+        console.log("Error connecting.. 😭",error)
     }
 }
+
 export default dbConnect

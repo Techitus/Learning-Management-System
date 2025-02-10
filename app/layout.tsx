@@ -8,8 +8,7 @@ import SessionWrapper from "@/components/SessionWrapper"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Amane Soft - Cutting-Edge Software Solutions",
-  description: "Amane Soft delivers innovative, high-performance software solutions for businesses of the future.",
+  title: "Learnify-Unlock New Horizons of Learning"
 }
 
 export default function RootLayout({
