@@ -3,6 +3,7 @@ const Schema =mongoose.Schema
 enum Role {
     Student = 'student',
     Admin = 'admin',
+    Teacher = 'teacher'
 }
 interface IUser extends Document {
     username : string;
@@ -24,7 +25,7 @@ const userSchema =new Schema<IUser>({
 
     role : {
         type : String,
-        enum : [Role.Admin ,Role.Student],
+        enum : [Role.Admin ,Role.Student,Role.Teacher],
         default : Role.Student,
         required : true
     }
