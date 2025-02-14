@@ -26,3 +26,20 @@ export async function createCategory(request: Request){
     },{status:500})
    }
 }
+
+export async function getCategories(){
+    await dbConnect()
+    const categories = await Category.find()
+    if(categories.length === 0){
+        return Response.json({
+            message : "No categories found 🥴"
+        },{status:404})
+    }
+    return Response.json({
+        message : "Categories fetch Successfully 😍",
+        data : categories
+    },{
+        status : 200,
+        
+    })
+}
