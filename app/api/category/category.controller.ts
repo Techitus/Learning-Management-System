@@ -1,8 +1,12 @@
 import dbConnect from "@/database/connection"
 import Category from "@/database/models/category.schema"
+import { authMiddleware } from "@/middleware/auth.middleware"
+import { NextRequest } from "next/server"
 
 export async function createCategory(request: Request){
    try{
+    authMiddleware(request as NextRequest)
+
     await dbConnect()
     const {name,description} = await request.json()
     const existingCategory = await Category.findOne({name: name})
