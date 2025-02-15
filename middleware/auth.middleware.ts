@@ -16,5 +16,5 @@ export const authMiddleware = async (request: NextRequest) => {
     )
   }
 
-  return NextResponse.next()
+  return NextResponse.next() //return pxi ko kura run grna
 }
