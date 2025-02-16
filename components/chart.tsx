@@ -37,13 +37,13 @@ const chartConfig = {
 
 export function Chart() {
   return (
-    <Card>
+    <Card className='h-[55vh] 2xl:h-[61vh]'>
       <CardHeader>
         <CardTitle>Data Analysis</CardTitle>
         <CardDescription>January - June 2025</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer className="h-[42vh] 2xl:h-[50vh] w-full" config={chartConfig}>
           <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis

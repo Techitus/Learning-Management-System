@@ -1,15 +1,16 @@
+'use client'
 import { Avatar } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
 
 export default function Notifications() {
   return (
-    <Card className="bg-black text-white border-zinc-800">
+    <Card className="bg-black text-white border-zinc-800 h-full   2xl:h-[35vh]">
       <CardHeader>
         <CardTitle className="text-lg font-medium">Notifications</CardTitle>
         <p className="text-sm text-zinc-400">You have 5 unread notifications</p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 h-[15vh] 2xl:h-[25vh]">
         <div className="flex items-center space-x-4">
           <Avatar className="h-9 w-9 border border-zinc-700">
             <Image src="/placeholder.svg?height=32&width=32" alt="Avatar" width={32} height={32}/>
@@ -54,16 +55,7 @@ export default function Notifications() {
           <p className="text-xs text-zinc-400">2d ago</p>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-9 w-9 border border-zinc-700">
-          <Image src="/placeholder.svg?height=32&width=32" alt="Avatar" width={32} height={32}/>
-          </Avatar>
-          <div className="flex-1 space-y-1">
-            <p className="text-sm font-medium leading-none">Project update</p>
-            <p className="text-sm text-zinc-400">New version deployed</p>
-          </div>
-          <p className="text-xs text-zinc-400">3d ago</p>
-        </div>
+        
       </CardContent>
     </Card>
   )

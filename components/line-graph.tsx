@@ -1,6 +1,6 @@
 "use client"
 
-import { CartesianGrid, Line, LineChart,  } from "recharts"
+import { CartesianGrid, Line, LineChart } from "recharts"
 
 import {
   Card,
@@ -14,6 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+
 const chartData = [
   { month: "January", desktop: 196 },
   { month: "February", desktop: 305 },
@@ -32,22 +33,24 @@ const chartConfig = {
 
 export function RevenueChart() {
   return (
-    <Card className="h-[200px]">
-      <CardHeader>
-        <CardTitle>Revenue Chart</CardTitle>
+    <Card className="hidden 2xl:block 2xl:h-[24vh] w-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">Revenue Chart</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
+      <CardContent className="h-full">
+        <ChartContainer className="w-full h-full" config={chartConfig}>
           <LineChart
-            accessibilityLayer
+            width={undefined} // Allow it to be responsive
+            height={200} // Set equivalent of h-[200px]
             data={chartData}
             margin={{
               left: 12,
               right: 12,
+              top: 5,
+              bottom: 5,
             }}
           >
-            <CartesianGrid vertical={false} />
-           
+            <CartesianGrid vertical={false} strokeOpacity={0.5} />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
@@ -62,7 +65,6 @@ export function RevenueChart() {
           </LineChart>
         </ChartContainer>
       </CardContent>
-      
     </Card>
   )
 }

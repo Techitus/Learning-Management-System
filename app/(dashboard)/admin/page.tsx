@@ -7,10 +7,10 @@ import { Users, BookOpen, GraduationCap, Activity } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
-       <div className='flex justify-between items-center'>
+    <div className="space-y-6 ">
+       <div className='md:flex space-y-6 md:space-y-0 justify-between items-center'>
        <div>
-          <h1 className='text-white text-4xl'>Dashboard</h1>
+          <h1 className='text-white text-4xl text-center md:text-start'>Dashboard</h1>
         </div>
        <div >
         <DateTimeCard/>
@@ -18,7 +18,7 @@ export default function DashboardPage() {
        </div>
 
        </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 ">
        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -61,11 +61,11 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="flex w-full gap-10">
-  <div className="w-3/5">
+      <div className=" space-y-6 xl:space-y-0 xl:flex w-full gap-10">
+  <div className="w-full xl:w-3/5">
     <Chart />
   </div>
-  <div className="w-2/5 space-y-7">
+  <div className="w-full xl:w-2/5 2xl:space-y-7">
   <RevenueChart/>
     <Notifications />
   </div>
