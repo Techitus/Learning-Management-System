@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/tooltip";
 
 const sidebarLinks = [
-  { name: 'Home', href: '/dashboard', icon: Home },
-  { name: 'Categories', href: '/dashboard/categories', icon: Layers },
+  { name: 'Home', href: '/admin', icon: Home },
+  { name: 'Categories', href: '/admin/categories', icon: Layers },
   { name: 'Courses', href: '/dashboard/courses', icon: BookOpen },
   { name: 'Students', href: '/dashboard/students', icon: Users },
   { name: 'Teachers', href: '/dashboard/teachers', icon: GraduationCap },

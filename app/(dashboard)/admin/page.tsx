@@ -1,3 +1,4 @@
+'use client'
 import { Chart } from '@/components/chart';
 import DateTimeCard from '@/components/date-time';
 import { RevenueChart } from '@/components/line-graph';
