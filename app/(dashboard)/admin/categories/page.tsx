@@ -159,7 +159,7 @@ export default function Home() {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => handleDeleteCategory(category.id)}
-                        className="bg-red-600 hover:bg-red-700"
+                        className="text-white bg-red-600 hover:bg-red-700"
                       >
                         Delete
                       </AlertDialogAction>

@@ -1,47 +1,47 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { FcGoogle } from "react-icons/fc"
-import { Menu, X } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { signIn, signOut, useSession } from "next-auth/react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { FcGoogle } from "react-icons/fc";
+import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const router = useRouter()
-  const { data: session } = useSession()
-
-  const toggleMenu = () => setIsOpen(!isOpen)
-
-  const handleLinkClick = (href: string) => {
-    router.push(href)
-    setIsOpen(false)
-  }
-
-  const handleLoginClick = () => {
-    signIn("google")
-  }
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" })
-  }
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const { data: session,  } = useSession();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "unset"
-    }
+    setMounted(true);
+  }, []);
 
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const handleLinkClick = (href: string) => {
+    router.push(href);
+    setIsOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    signIn("google");
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
     return () => {
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen])
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const UserMenu = () => (
     <DropdownMenu>
@@ -61,7 +61,7 @@ export default function Navbar() {
         <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -73,12 +73,14 @@ export default function Navbar() {
           <Link href="/" className="flex items-center">
             <span className="font-bold text-xl">Learnify</span>
           </Link>
-          {session ? (
+          {mounted && session ? (
             <UserMenu />
           ) : (
-            <Button onClick={handleLoginClick} variant="ghost" size="icon" aria-label="Sign in with Google">
-              <FcGoogle className="h-6 w-6" />
-            </Button>
+            mounted && (
+              <Button onClick={handleLoginClick} variant="ghost" size="icon" aria-label="Sign in with Google">
+                <FcGoogle className="h-6 w-6" />
+              </Button>
+            )
           )}
         </div>
 
@@ -101,12 +103,14 @@ export default function Navbar() {
             <Button variant="ghost" size="sm">
               Contact
             </Button>
-            {session ? (
+            {mounted && session ? (
               <UserMenu />
             ) : (
-              <Button onClick={handleLoginClick} className="hover:opacity-60" size="sm">
-                <FcGoogle className="mr-2 h-4 w-4" /> Sign in with Google
-              </Button>
+              mounted && (
+                <Button onClick={handleLoginClick} className="hover:opacity-60" size="sm">
+                  <FcGoogle className="mr-2 h-4 w-4" /> Sign in with Google
+                </Button>
+              )
             )}
           </div>
         </div>
@@ -157,7 +161,7 @@ export default function Navbar() {
                 >
                   Contact
                 </Link>
-                {session && (
+                {mounted && session && (
                   <Button onClick={handleLogout} variant="ghost" className="justify-start px-0">
                     Log out
                   </Button>
@@ -168,6 +172,5 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </header>
-  )
+  );
 }
-
