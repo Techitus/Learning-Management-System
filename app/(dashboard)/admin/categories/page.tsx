@@ -9,7 +9,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  // DialogTitle,
+  DialogTitle,
   DialogTrigger,
   DialogFooter,
   DialogClose,
@@ -28,60 +28,98 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchCategories } from "@/store/category/categorySlice";
+import { createCategory, fetchCategories, resetStatus, updateCategory, deleteCategory } from "@/store/category/categorySlice";
+import { Status } from "@/types/status.types";
+import toast, { Toaster } from "react-hot-toast";
 
-// interface Category {
-//   id: number;
-//   name: string;
-// }
+interface ICategory {
+  _id: string;
+  name: string;
+  createdAt: string;
+}
 
 export default function Home() {
-  const dispatch = useAppDispatch()
-  const {categories} = useAppSelector((state)=>state.categories)
-  console.log(categories)
+  const dispatch = useAppDispatch();
+  const { categories, status } = useAppSelector((state) => state.categories);
   const [isOpen, setIsOpen] = useState(false);
-  // const [categoryName, setCategoryName] = useState("");
-  // const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [name, setCategoryName] = useState("");
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
+  const [prevCategoriesLength, setPrevCategoriesLength] = useState(categories.length);
 
-  // const handleAddCategory = () => {
-  //   if (categoryName.trim()) {
-  //     const newCategory = {
-  //       id: categories.length + 1,
-  //       name: categoryName.trim(),
-  //     };
-  //     setCategories([...categories, newCategory]);
-  //     setCategoryName("");
-  //     setIsOpen(false);
-  //   }
-  // };
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, []);
 
-  // const handleUpdateCategory = () => {
-  //   if (editingCategory && categoryName.trim()) {
-  //     setCategories(
-  //       categories.map((cat) =>
-  //         cat.id === editingCategory.id
-  //           ? { ...cat, name: categoryName.trim() }
-  //           : cat
-  //       )
-  // //     );
-  //     setEditingCategory(null);
-  //     setCategoryName("");
-  //     setIsOpen(false);
-  //   }
-  // };
+  useEffect(() => {
+    if (status === Status.SUCCESS) {
+      if (editingCategory) {
+        toast.success("Category updated successfully!", {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
+      } else if (name.trim()) {
+        toast.success("Category added successfully!", {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
+      }
+      setIsOpen(false);
+      setCategoryName("");
+      setEditingCategory(null);
+      dispatch(resetStatus());
+    }
+  }, [status, dispatch, editingCategory, name]);
 
-  // const handleDeleteCategory = (id: number) => {
-  //   setCategories(categories.filter((cat) => cat.id !== id));
-  // };
+  useEffect(() => {
+    if (status === Status.SUCCESS && categories.length < prevCategoriesLength) {
+      toast.success("Category deleted successfully!", {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+      });
+      setPrevCategoriesLength(categories.length);
+      dispatch(resetStatus());
+    }
+  }, [status, dispatch, categories, prevCategoriesLength]);
 
-  // const handleEdit = (category: Category) => {
-  //   setEditingCategory(category);
-  //   setCategoryName(category.name);
-  //   setIsOpen(true);
-  // };
-  useEffect(()=>{
-   dispatch(fetchCategories())
-  },[])
+  const handleAddCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim()) {
+      dispatch(createCategory({ name }));
+    }
+  };
+
+  const handleUpdateCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingCategory && name.trim()) {
+      dispatch(
+        updateCategory({
+          id: editingCategory._id,
+          name: name.trim(),
+        })
+      );
+    }
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    setPrevCategoriesLength(categories.length);
+    dispatch(deleteCategory(id));
+  };
+
+  const handleEdit = (category: ICategory) => {
+    setEditingCategory(category);
+    setCategoryName(category.name);
+    setIsOpen(true);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
@@ -89,10 +127,10 @@ export default function Home() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button
-              // onClick={() => {
-              //   setEditingCategory(null);
-              //   setCategoryName("");
-              // }}
+              onClick={() => {
+                setEditingCategory(null);
+                setCategoryName("");
+              }}
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" /> Add Category
@@ -100,30 +138,30 @@ export default function Home() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              {/* <DialogTitle>
+              <DialogTitle>
                 {editingCategory ? "Edit Category" : "Add New Category"}
-              </DialogTitle> */}
+              </DialogTitle>
             </DialogHeader>
-            <div className="py-4">
-              <Label htmlFor="categoryName">Category Name</Label>
-              <Input
-                id="categoryName"
-                // value={name}
-                // onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Enter category name"
-                className="mt-2"
-              />
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button
-                // onClick={editingCategory ? handleUpdateCategory : handleAddCategory}
-              >
-                {/* {editingCategory ? "Update" : "Add"} */}
-              </Button>
-            </DialogFooter>
+            <form onSubmit={editingCategory ? handleUpdateCategory : handleAddCategory}>
+              <div className="py-4">
+                <Label htmlFor="categoryName">Category Name</Label>
+                <Input
+                  id="categoryName"
+                  value={name}
+                  onChange={(e) => setCategoryName(e.target.value)}
+                  placeholder="Enter category name"
+                  className="mt-2"
+                />
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit">
+                  {editingCategory ? "Update" : "Add"}
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
@@ -140,7 +178,7 @@ export default function Home() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  // onClick={() => handleEdit(category)}
+                  onClick={() => handleEdit(category)}
                 >
                   <Pencil className="h-4 w-4 text-white/90" />
                 </Button>
@@ -154,14 +192,13 @@ export default function Home() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Category</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{category.name}"? This
-                        action cannot be undone.
+                        Are you sure you want to delete "{category.name}"? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        // onClick={() => handleDeleteCategory(category.id)}
+                        onClick={() => handleDeleteCategory(category._id)}
                         className="text-white bg-red-600 hover:bg-red-700"
                       >
                         Delete
@@ -179,6 +216,7 @@ export default function Home() {
           )}
         </div>
       </div>
+      <Toaster position="bottom-right" reverseOrder={false} />
     </div>
   );
 }

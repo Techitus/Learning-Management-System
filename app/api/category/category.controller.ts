@@ -15,11 +15,12 @@ export async function createCategory(request: Request){
             message : "Category already exists 🥴"
         },{status:400})
     }
-    await Category.create({
+  const category =  await Category.create({
         name
     })
     return Response.json({
-        message : "Category created successfully 🥰 "
+        message : "Category created successfully 🥰 ",
+        data : category
     },{
         status : 200
     })
@@ -46,4 +47,54 @@ export async function getCategories(){
         status : 200,
         
     })
+}
+export async function deleteCategory(id:string ,request: Request){
+    try{
+       await dbConnect()
+       authMiddleware(request as NextRequest) 
+     const deleted = await Category.findByIdAndDelete(id)
+     if(!deleted){
+        return Response.json({
+            message : "Category not found or deleted 😴"
+        },{status:404})
+     }
+     return Response.json({
+        message : "Category deleted successfully 😍 "
+        },{status : 200})
+    }catch(err){
+        console.log(err)
+        return Response.json({
+            message : "Error deleting category 🙃"
+        },{status:500})
+    }
+}
+
+export async function updateCategory(id: string, request: Request) {
+    try {
+        await dbConnect();
+        authMiddleware(request as NextRequest);
+
+        const { name } = await request.json();
+
+        const existingCategory = await Category.findById(id);
+        if (!existingCategory) {
+            return Response.json({
+                message: "Category not found 😴"
+            }, { status: 404 });
+        }
+
+        existingCategory.name = name;
+        await existingCategory.save();
+
+        return Response.json({
+            message: "Category updated successfully 😊",
+            data: existingCategory
+        }, { status: 200 });
+
+    } catch (err) {
+        console.log(err);
+        return Response.json({
+            message: "Error updating category 🙃"
+        }, { status: 500 });
+    }
 }
