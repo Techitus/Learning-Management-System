@@ -4,6 +4,7 @@ import type React from "react"
 import type { Metadata } from "next"
 
 import SessionWrapper from "@/components/SessionWrapper"
+import StoreProvider from "./StoreProvider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -17,15 +18,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
+    <SessionWrapper>
     <html lang="en" className="dark overflow-y-auto">
      
       <body className={`${inter.className} custom-scroller bg-background  antialiased`}>
-      <SessionWrapper>
+      <StoreProvider>
         {children}
-        </SessionWrapper>
+     </StoreProvider>
       </body>
       
     </html>
+    </SessionWrapper>
   )
 }
 

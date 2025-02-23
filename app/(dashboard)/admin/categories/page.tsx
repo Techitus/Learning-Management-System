@@ -1,14 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  // DialogTitle,
   DialogTrigger,
   DialogFooter,
   DialogClose,
@@ -26,59 +27,61 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCategories } from "@/store/category/categorySlice";
 
-interface Category {
-  id: number;
-  name: string;
-}
+// interface Category {
+//   id: number;
+//   name: string;
+// }
 
 export default function Home() {
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: "Electronics" },
-    { id: 2, name: "Books" },
-    { id: 3, name: "Clothing" },
-  ]);
+  const dispatch = useAppDispatch()
+  const {categories} = useAppSelector((state)=>state.categories)
+  console.log(categories)
   const [isOpen, setIsOpen] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  // const [categoryName, setCategoryName] = useState("");
+  // const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  const handleAddCategory = () => {
-    if (categoryName.trim()) {
-      const newCategory = {
-        id: categories.length + 1,
-        name: categoryName.trim(),
-      };
-      setCategories([...categories, newCategory]);
-      setCategoryName("");
-      setIsOpen(false);
-    }
-  };
+  // const handleAddCategory = () => {
+  //   if (categoryName.trim()) {
+  //     const newCategory = {
+  //       id: categories.length + 1,
+  //       name: categoryName.trim(),
+  //     };
+  //     setCategories([...categories, newCategory]);
+  //     setCategoryName("");
+  //     setIsOpen(false);
+  //   }
+  // };
 
-  const handleUpdateCategory = () => {
-    if (editingCategory && categoryName.trim()) {
-      setCategories(
-        categories.map((cat) =>
-          cat.id === editingCategory.id
-            ? { ...cat, name: categoryName.trim() }
-            : cat
-        )
-      );
-      setEditingCategory(null);
-      setCategoryName("");
-      setIsOpen(false);
-    }
-  };
+  // const handleUpdateCategory = () => {
+  //   if (editingCategory && categoryName.trim()) {
+  //     setCategories(
+  //       categories.map((cat) =>
+  //         cat.id === editingCategory.id
+  //           ? { ...cat, name: categoryName.trim() }
+  //           : cat
+  //       )
+  // //     );
+  //     setEditingCategory(null);
+  //     setCategoryName("");
+  //     setIsOpen(false);
+  //   }
+  // };
 
-  const handleDeleteCategory = (id: number) => {
-    setCategories(categories.filter((cat) => cat.id !== id));
-  };
+  // const handleDeleteCategory = (id: number) => {
+  //   setCategories(categories.filter((cat) => cat.id !== id));
+  // };
 
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
-    setCategoryName(category.name);
-    setIsOpen(true);
-  };
-
+  // const handleEdit = (category: Category) => {
+  //   setEditingCategory(category);
+  //   setCategoryName(category.name);
+  //   setIsOpen(true);
+  // };
+  useEffect(()=>{
+   dispatch(fetchCategories())
+  },[])
   return (
     <div className="max-w-4xl mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
@@ -86,10 +89,10 @@ export default function Home() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button
-              onClick={() => {
-                setEditingCategory(null);
-                setCategoryName("");
-              }}
+              // onClick={() => {
+              //   setEditingCategory(null);
+              //   setCategoryName("");
+              // }}
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" /> Add Category
@@ -97,16 +100,16 @@ export default function Home() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
+              {/* <DialogTitle>
                 {editingCategory ? "Edit Category" : "Add New Category"}
-              </DialogTitle>
+              </DialogTitle> */}
             </DialogHeader>
             <div className="py-4">
               <Label htmlFor="categoryName">Category Name</Label>
               <Input
                 id="categoryName"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
+                // value={name}
+                // onChange={(e) => setCategoryName(e.target.value)}
                 placeholder="Enter category name"
                 className="mt-2"
               />
@@ -116,9 +119,9 @@ export default function Home() {
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
               <Button
-                onClick={editingCategory ? handleUpdateCategory : handleAddCategory}
+                // onClick={editingCategory ? handleUpdateCategory : handleAddCategory}
               >
-                {editingCategory ? "Update" : "Add"}
+                {/* {editingCategory ? "Update" : "Add"} */}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -127,9 +130,9 @@ export default function Home() {
 
       <div className="bg-black/30 rounded-lg shadow">
         <div className="divide-y divide-gray-600">
-          {categories.map((category) => (
+          {categories?.map((category) => (
             <div
-              key={category.id}
+              key={category._id}
               className="flex items-center justify-between p-4 hover:bg-black/50"
             >
               <span className="text-lg text-white/90">{category.name}</span>
@@ -137,7 +140,7 @@ export default function Home() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleEdit(category)}
+                  // onClick={() => handleEdit(category)}
                 >
                   <Pencil className="h-4 w-4 text-white/90" />
                 </Button>
@@ -158,7 +161,7 @@ export default function Home() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleDeleteCategory(category.id)}
+                        // onClick={() => handleDeleteCategory(category.id)}
                         className="text-white bg-red-600 hover:bg-red-700"
                       >
                         Delete
