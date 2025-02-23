@@ -1,7 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-
 import {
   Card,
   CardContent,
@@ -15,6 +15,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -36,6 +37,16 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function Chart() {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true) 
+  }, [])
+
+  if (!isClient) {
+    return null 
+  }
+
   return (
     <Card className='h-[55vh] 2xl:h-[61vh]'>
       <CardHeader>
@@ -62,7 +73,6 @@ export function Chart() {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      
     </Card>
   )
 }

@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark ">
+    <html lang="en" className="dark overflow-y-auto">
      
       <body className={`${inter.className} custom-scroller bg-background  antialiased`}>
       <SessionWrapper>

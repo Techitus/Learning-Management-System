@@ -8,7 +8,7 @@ export async function createCategory(request: Request){
     authMiddleware(request as NextRequest)
 
     await dbConnect()
-    const {name,description} = await request.json()
+    const {name} = await request.json()
     const existingCategory = await Category.findOne({name: name})
     if(existingCategory){
         return Response.json({
@@ -16,7 +16,7 @@ export async function createCategory(request: Request){
         },{status:400})
     }
     await Category.create({
-        name,description
+        name
     })
     return Response.json({
         message : "Category created successfully 🥰 "

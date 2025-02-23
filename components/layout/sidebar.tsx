@@ -6,11 +6,11 @@ import {
   BookOpen,
   Users,
   GraduationCap,
-  Calendar,
-  Settings,
   ChevronLeft,
   Layers,
-  Maximize
+  Maximize,
+  CircleUser,
+  Store
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -25,11 +25,11 @@ import {
 const sidebarLinks = [
   { name: 'Home', href: '/admin', icon: Home },
   { name: 'Categories', href: '/admin/categories', icon: Layers },
-  { name: 'Courses', href: '/dashboard/courses', icon: BookOpen },
-  { name: 'Students', href: '/dashboard/students', icon: Users },
-  { name: 'Teachers', href: '/dashboard/teachers', icon: GraduationCap },
-  { name: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Courses', href: '/admin/courses', icon: BookOpen },
+  { name: 'Users', href: '/admin/users', icon: CircleUser },
+  { name: 'Teachers', href: '/admin/teachers', icon: GraduationCap },
+  { name: 'Students', href: '/admin/students', icon: Users },
+  { name: 'About Us', href: '/admin/about', icon: Store },
 ];
 
 export function Sidebar() {

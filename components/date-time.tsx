@@ -1,25 +1,25 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 
 export default function DateTimeCard() {
-  const [dateTime, setDateTime] = useState("")
+  const [dateTime, setDateTime] = useState<string | null>(null)
 
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date()
       const options: Intl.DateTimeFormatOptions = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
         hour12: true,
       }
-      setDateTime(now.toLocaleString("en-US", options))
+      setDateTime(now.toLocaleString('en-US', options))
     }
 
     updateDateTime()
@@ -27,6 +27,16 @@ export default function DateTimeCard() {
 
     return () => clearInterval(timer)
   }, [])
+
+  if (dateTime === null) {
+    return (
+      <Card className="bg-zinc-900 border-zinc-800">
+        <CardContent className="p-3">
+          <p className="text-white text-sm font-medium">Loading...</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="bg-zinc-900 border-zinc-800">
@@ -36,4 +46,3 @@ export default function DateTimeCard() {
     </Card>
   )
 }
-
