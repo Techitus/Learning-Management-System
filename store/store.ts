@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import categorySlice from './category/categorySlice'
+import userSlice from './users/userSlice'
+
 export const makeStore = () => {
   return configureStore({
     reducer: {
-        categories : categorySlice
+        categories : categorySlice,
+        users: userSlice
     },
   })
 }

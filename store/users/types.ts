@@ -1,9 +1,14 @@
+import { Role } from "@/database/models/user.schema";
 import { Status } from "@/types/status.types";
 
-interface IUsers{
+export interface IUsers{
     _id : string,
-    name : string,
-    createdAt : string,
+    username : string,
+    profileImage : string,
+    email : string,
+    role : Role,
+    createdAt: string,
+    
 }
 export interface IUsersInitialState {
     users :IUsers[],

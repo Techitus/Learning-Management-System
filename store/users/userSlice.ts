@@ -1,67 +1,74 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { IUsersInitialState } from "./types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { IUsers, IUsersInitialState } from "./types";
 import { Status } from "@/types/status.types";
 import { AppDispatch } from "../store";
 import API from "@/http";
+import { Role } from "@/database/models/user.schema";
 const usersDatas: IUsersInitialState = {
     users: [],
     status: Status.LOADING,
 };
 
-const userSlice =createSlice({
+const userSlice = createSlice({
     name: 'users',
     initialState : usersDatas,
-    reducers:{
+    reducers: {
+        setUsers: (state, action: PayloadAction<IUsers[]>) => {
+            state.users = action.payload;
+            state.status = Status.SUCCESS;
+        },
         setStatus(state, action) {
             state.status = action.payload;
         },
-        setUsers(state,action){
-            state.users = action.payload;
+        deleteUser: (state, action: PayloadAction<string>) => {
+            state.users = state.users.filter(user => user._id !== action.payload);
         },
-        deleteUsersByIndex(state, action) {
-            const index = state.users.findIndex(
-                (user) => user._id === action.payload
+        updateUserRole: (state, action: PayloadAction<{ userId: string; role: Role }>) => {
+            state.users = state.users.map(user =>
+                user._id === action.payload.userId 
+                    ? { ...user, role: action.payload.role }
+                    : user
             );
-            if (index !== -1) {
-                state.users.splice(index, 1);
-            }
         }
     }
-})
-export const {setStatus,setUsers,deleteUsersByIndex} = userSlice.actions
-export default  userSlice.reducer
+});
 
-export async function fetchUsers(){
-    return async function fetchUserThunk(dispatch: AppDispatch){
-        try{
-            const response = await API.get('/users')
-            if(response.status === 200){
-                dispatch(setUsers(response.data.data))
-            }else{
-                dispatch(setStatus(Status.ERROR))
-                console.error(response.data.message)
-            }
-        }catch(err){
-            dispatch(setStatus(Status.ERROR))
-            console.error(err)
+export const { setUsers, setStatus, deleteUser, updateUserRole } = userSlice.actions;
+export default userSlice.reducer
+export const fetchUsers = () => async (dispatch: AppDispatch) => {
+    try {
+        dispatch(setStatus(Status.LOADING));
+        const response = await API.get('/users');
+        if (response.status === 200) {
+            dispatch(setUsers(response.data.data));
+        } else {
+            dispatch(setStatus(Status.ERROR));
         }
+    } catch (error) {
+        dispatch(setStatus(Status.ERROR));
+        console.error('Error fetching users:', error);
     }
-}
+};
 
-export async function deleteUser(id:string){
-return async function deleteUserThunk(dispatch:AppDispatch){
-    try{
-      const response = await API.delete('/users'+id)
-      if(response.status === 200){
-        dispatch(setStatus(Status.SUCCESS))
-        dispatch(deleteUsersByIndex(id))
-      }else{
-        dispatch(setStatus(Status.ERROR))
-      }
-    }catch(err){
-        dispatch(setStatus(Status.ERROR))
-        console.error(err)
-
+export const deleteUserById = (userId: string) => async (dispatch: AppDispatch) => {
+    try {
+        const response = await API.delete(`/users/${userId}`);
+        if (response.status === 200) {
+            dispatch(deleteUser(userId));
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
     }
-}
-}
+};
+
+export const promoteToTeacher = (userId: string) => async (dispatch: AppDispatch) => {
+    try {
+        const response = await API.patch(`/users/${userId}`, { role: Role.Teacher });
+        if (response.status === 200) {
+            dispatch(updateUserRole({ userId, role: Role.Teacher }));
+        }
+    } catch (error) {
+        console.error('Error promoting user:', error);
+    }
+};
+

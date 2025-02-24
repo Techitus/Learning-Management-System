@@ -8,7 +8,13 @@ export async function fetchUsers(request:Request){
         await dbConnect();
         authMiddleware(request as NextRequest)
         const users = await User.find().select('-password');
-        return NextResponse.json(users);
+        return Response.json({
+          message : "Users fetch Successfully 😍",
+          data : users
+      },{
+          status : 200,
+          
+      })
       } catch (error) {
         console.error('Error fetching users:', error);
         return NextResponse.json(

@@ -11,6 +11,7 @@ interface IUser extends Document {
     profileImage: string;
     email: string;
     role: Role;
+    createdAt : Date
 }
 
 const userSchema = new Schema<IUser>({
@@ -28,10 +29,14 @@ const userSchema = new Schema<IUser>({
         enum: [Role.Admin, Role.Student, Role.Teacher],
         default: Role.Student,
         required: true
+    },
+    createdAt : {
+        type : Date,
+        default : Date.now()
     }
 });
 
 // Prevent model overwrite issue
-const User = models.User || mongoose.model<IUser>("User", userSchema);
+const User = models?.User || mongoose.model<IUser>("User", userSchema);
 
 export default User;
