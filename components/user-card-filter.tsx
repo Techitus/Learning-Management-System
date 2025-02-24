@@ -128,6 +128,13 @@ export default function UserCard({ users }: UserCardProps) {
   const handlePromoteUser = async (userId: string) => {
     if (confirmationInput === "Teacher") {
       await dispatch(promoteToTeacher(userId));
+      toast.success("Promoted to Teacher successfully!", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
       setPromoteConfirmation({ isOpen: false, userId: null });
       setConfirmationInput("");
     }

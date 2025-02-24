@@ -16,7 +16,7 @@ export default function Teachers() {
   const filteredTeacher = users.filter((user) => user.role === Role.Teacher);
 
   return (
-    <div className="container mx-auto p-4 flex justify-center items-center">
+    <div className="container mx-auto p-4">
       {filteredTeacher.length > 0 ? (
         <UserCard users={filteredTeacher} />
       ) : (
