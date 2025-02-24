@@ -1,39 +1,23 @@
+'use client'
 import UserCard from "@/components/user-card-filter"
+import { Role } from "@/database/models/user.schema";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUsers } from "@/store/users/userSlice";
+import { useEffect } from "react";
 
-const users = [
-  {
-    id: 1,
-    name: "Alice Johnson",
-    image: "/placeholder.svg?height=100&width=100",
-    joinedDate: "2023-01-15",
-    email: "alice@example.com",
-    mobile: "+1234567890",
-    courses: ["React", "Node.js"],
-  },
-  {
-    id: 2,
-    name: "Bob Smith",
-    image: "/placeholder.svg?height=100&width=100",
-    joinedDate: "2023-03-22",
-    email: "bob@example.com",
-    mobile: "+1987654321",
-    courses: ["Python", "Data Science"],
-  },
-  {
-    id: 3,
-    name: "Charlie Brown",
-    image: "/placeholder.svg?height=100&width=100",
-    joinedDate: "2023-02-10",
-    email: "charlie@example.com",
-    mobile: "+1122334455",
-    courses: ["JavaScript", "React"],
-  },
-]
 
-export default function Teachers() {
+
+export default function Students() {
+   const dispatch = useAppDispatch();
+    const { users } = useAppSelector((state) => state.users);
+     
+    useEffect(() => {
+      dispatch(fetchUsers()); 
+    }, [dispatch]); 
+    const filteredStudent = users.filter((user) => user.role === Role.Student);
   return (
     <div className="container mx-auto p-4">
-      <UserCard users={users} />
+      <UserCard users={filteredStudent} />
     </div>
   )
 }

@@ -33,6 +33,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks"
 import { fetchCategories } from "@/store/category/categorySlice"
 import { deleteUserById, promoteToTeacher } from "@/store/users/userSlice"
 import { Role } from "@/database/models/user.schema"
+import toast, { Toaster } from "react-hot-toast"
 
 interface ICategory {
   _id: string;
@@ -112,6 +113,13 @@ export default function UserCard({ users }: UserCardProps) {
     const userToDelete = users.find(user => user._id === userId);
     if (userToDelete && confirmationInput === userToDelete.username) {
       await dispatch(deleteUserById(userId));
+      toast.success("User deleted successfully!", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
       setDeleteConfirmation({ isOpen: false, userId: null });
       setConfirmationInput("");
     }
@@ -343,6 +351,7 @@ export default function UserCard({ users }: UserCardProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Toaster position="bottom-right" reverseOrder={false} />
     </div>
   );
 }
