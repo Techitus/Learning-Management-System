@@ -1,20 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState } from "react";
+import { fetchCategories } from "@/store/category/categorySlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useEffect } from "react";
 
-interface Category {
-  id: number;
-  name: string;
-}
+
 
 export default function Home() {
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: "Electronics" },
-    { id: 2, name: "Books" },
-    { id: 3, name: "Clothing" },
-  ]);
-
+  const dispatch = useAppDispatch()
+ const {categories} = useAppSelector((state)=>state.categories)
+ console.log(categories)
+ useEffect(()=>{
+  dispatch(fetchCategories())
+ },[])
 
 
   return (
@@ -28,7 +27,7 @@ export default function Home() {
         <div className="divide-y divide-gray-600  justify-between">
           {categories.map((category) => (
             <div
-              key={category.id}
+              key={category._id}
               className="flex items-center  justify-between p-4 hover:bg-black/50"
             >
               <span className="text-lg  text-white/90">{category.name}</span>

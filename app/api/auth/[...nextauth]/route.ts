@@ -15,6 +15,16 @@ export const authOptions: AuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    callbacks: {
+      async session({ session, token }: { session: Session; token: any }) {
+        if (session.user) { 
+          session.user.id = token.id;
+          session.user.role = token.role;
+        }
+        return session;
+      }
+    }
+,    
     async signIn({ user }: { user: { name: string; email: string; image: string } }): Promise<boolean> {
       try {
         await dbConnect();
@@ -57,3 +67,4 @@ export const authOptions: AuthOptions = {
 //@ts-ignore
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
+

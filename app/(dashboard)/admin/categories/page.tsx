@@ -56,7 +56,7 @@ export default function Home() {
         toast.success("Category updated successfully!", {
           style: {
             borderRadius: "10px",
-            background: "#333",
+            background: "#000",
             color: "#fff",
           },
         });
@@ -64,7 +64,7 @@ export default function Home() {
         toast.success("Category added successfully!", {
           style: {
             borderRadius: "10px",
-            background: "#333",
+            background: "#000",
             color: "#fff",
           },
         });
@@ -81,7 +81,7 @@ export default function Home() {
       toast.success("Category deleted successfully!", {
         style: {
           borderRadius: "10px",
-          background: "#333",
+          background: "#000",
           color: "#fff",
         },
       });

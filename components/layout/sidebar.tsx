@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import {
+import { 
   Home,
   BookOpen,
   Users,
@@ -22,17 +22,30 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const sidebarLinks = [
-  { name: 'Home', href: '/admin', icon: Home },
-  { name: 'Categories', href: '/admin/categories', icon: Layers },
-  { name: 'Courses', href: '/admin/courses', icon: BookOpen },
-  { name: 'Users', href: '/admin/users', icon: CircleUser },
-  { name: 'Teachers', href: '/admin/teachers', icon: GraduationCap },
-  { name: 'Students', href: '/admin/students', icon: Users },
-  { name: 'About Us', href: '/admin/about', icon: Store },
-];
+const ICON_MAP = {
+  'Home': Home,
+  'BookOpen': BookOpen,
+  'Users': Users,
+  'GraduationCap': GraduationCap,
+  'Layers': Layers,
+  'CircleUser': CircleUser,
+  'Store': Store,
+} as const;
 
-export function Sidebar() {
+type IconName = keyof typeof ICON_MAP;
+
+type SidebarLink = {
+  name: string;
+  href: string;
+  icon: IconName;  
+};
+
+interface SidebarProps {
+  links: ReadonlyArray<SidebarLink> | SidebarLink[];
+    logo?: string;
+}
+
+export function Sidebar({ links, logo = "Learnify" }: SidebarProps) {
   const [expanded, setExpanded] = useState(true);
   const pathname = usePathname();
 
@@ -45,7 +58,7 @@ export function Sidebar() {
         <div className="p-4 pb-2 flex justify-between items-center border-b border-gray-700">
           <div className={cn("flex items-center gap-2", !expanded && "hidden")}>
             <BookOpen className="h-8 w-8 text-white" />
-            <span className="text-xl 2xl:text-3xl font-bold text-white">Learnify</span>
+            <span className="text-xl 2xl:text-3xl font-bold text-white">{logo}</span>
           </div>
           <button
             onClick={() => setExpanded((curr) => !curr)}
@@ -54,11 +67,10 @@ export function Sidebar() {
             {expanded ? <ChevronLeft className="text-white" /> : <Maximize className="text-white" />}
           </button>
         </div>
-
         <TooltipProvider delayDuration={0}>
           <ul className="flex-1 px-3 py-2 text-white">
-            {sidebarLinks.map((item) => {
-              const Icon = item.icon;
+            {links.map((item) => {
+              const Icon = ICON_MAP[item.icon];
               return (
                 <li key={item.name}>
                   {!expanded ? (
@@ -67,7 +79,7 @@ export function Sidebar() {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-3 p-3   rounded-lg transition-all text-white hover:bg-gray-700 hover:text-white",
+                            "flex items-center gap-3 p-3 rounded-lg transition-all text-white hover:bg-gray-700 hover:text-white",
                             pathname === item.href && "bg-gray-800 text-white font-semibold",
                             !expanded && "justify-center p-2"
                           )}

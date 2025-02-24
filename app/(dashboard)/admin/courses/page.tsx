@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Clock, Tag, Upload } from "lucide-react";
+import { PlusCircle, Clock, Tag, Upload, FilePenLine, Trash2, User, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -36,14 +38,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image, { StaticImageData } from "next/image";
 import web from '@/Images/web.jpeg'
 import app from '@/Images/app.jpeg'
-
-const categories = [
-  "Web Development",
-  "Mobile Development",
-  "Data Science",
-  "UI/UX Design",
-  "DevOps",
-];
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCategories } from "@/store/category/categorySlice";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const formSchema = z.object({
   name: z.string().min(1, "Course name is required"),
@@ -51,6 +48,7 @@ const formSchema = z.object({
   description: z.string(),
   duration: z.string().min(1, "Duration is required"),
   category: z.string().min(1, "Category is required"),
+  mentor: z.string().min(1, "Mentor name is required"),
   image: z.instanceof(File, { message: "Image is required" }).optional(),
 });
 
@@ -61,10 +59,26 @@ type Course = {
   description: string;
   duration: string;
   category: string;
+  mentor: string;
   image: any;
 };
 
 export default function Home() {
+  const {categories} = useAppSelector((state)=>state.categories)
+  const dispatch = useAppDispatch()
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [priceSort, setPriceSort] = useState<"asc" | "desc" | "none">("none");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  useEffect(()=>{
+    dispatch(fetchCategories())
+  },[])
+
   const [courses, setCourses] = useState<Course[]>([
     {
       id: 1,
@@ -73,76 +87,50 @@ export default function Home() {
       description: "Learn modern web development with React and Next.js",
       duration: "12 weeks",
       category: "Web Development",
+      mentor: "John Doe",
       image: web,
     },
     {
       id: 2,
       name: "iOS App Development",
       price: "149.99",
-      description: "Build iOS apps with uild iOS apps with Swift hahaah",
+      description: "Build iOS apps with Swift",
       duration: "16 weeks",
       category: "Mobile Development",
+      mentor: "Jane Smith",
       image: app,
     },
     {
-        id: 3,
-        name: "Modern Web Development",
-        price: "99.99",
-        description: "Learn modern web development with React and Next.js",
-        duration: "12 weeks",
-        category: "Web Development",
-        image: web,
-      },
-      {
-        id: 4,
-        name: "iOS App Development",
-        price: "149.99",
-        description: "Build iOS apps with uild iOS apps with Swift hahaah",
-        duration: "16 weeks",
-        category: "Mobile Development",
-        image: app,
-      },
-      {
-        id: 5,
-        name: "Modern Web Development",
-        price: "99.99",
-        description: "Learn modern web development with React and Next.js",
-        duration: "12 weeks",
-        category: "Web Development",
-        image: web,
-      },
-      {
-        id: 6,
-        name: "iOS App Development",
-        price: "149.99",
-        description: "Build iOS apps with uild iOS apps with Swift hahaah",
-        duration: "16 weeks",
-        category: "Mobile Development",
-        image: app,
-      },
-      {
-        id: 7,
-        name: "Modern Web Development",
-        price: "99.99",
-        description: "Learn modern web development with React and Next.js",
-        duration: "12 weeks",
-        category: "Web Development",
-        image: web,
-      },
-      {
-        id: 8,
-        name: "iOS App Development",
-        price: "149.99",
-        description: "Build iOS apps with uild iOS apps with Swift hahaah",
-        duration: "16 weeks",
-        category: "Mobile Development",
-        image: app,
-      },
+      id: 3,
+      name: "iOS App Development",
+      price: "149.99",
+      description: "Build iOS apps with Swift",
+      duration: "16 weeks",
+      category: "Mobile Development",
+      mentor: "Jane Smith",
+      image: app,
+    },
+    {
+      id: 4,
+      name: "iOS App Development",
+      price: "149.99",
+      description: "Build iOS apps with Swift",
+      duration: "16 weeks",
+      category: "Mobile Development",
+      mentor: "Jane Smith",
+      image: app,
+    },
+    {
+      id: 5,
+      name: "iOS App Development",
+      price: "149.99",
+      description: "Build iOS apps with Swift",
+      duration: "16 weeks",
+      category: "Mobile Development",
+      mentor: "Jane Smith",
+      image: web,
+    },
   ]);
-
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [priceSort, setPriceSort] = useState<"asc" | "desc" | "none">("none");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -152,6 +140,7 @@ export default function Home() {
       description: "",
       duration: "",
       category: "",
+      mentor: "",
     },
   });
 
@@ -166,21 +155,66 @@ export default function Home() {
     }
   };
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const imageUrl = imagePreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3";
-    const newCourse: Course = {
-      id: courses.length + 1,
-      ...values,
-      image: imageUrl,
-    };
-    setCourses([...courses, newCourse]);
+  const handleOpenDialog = () => {
+    setIsEditing(false);
     form.reset();
     setImagePreview(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = (course: Course) => {
+    setIsEditing(true);
+    setEditingCourse(course);
+    form.reset({
+      name: course.name,
+      price: course.price,
+      description: course.description,
+      duration: course.duration,
+      category: course.category,
+      mentor: course.mentor,
+    });
+  };
+
+  const handleDelete = (courseId: number, courseName: string) => {
+    if (deleteConfirmName === courseName) {
+      setCourses(courses.filter(course => course.id !== courseId));
+      setDeleteConfirmName("");
+    }
+  };
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const imageUrl = imagePreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3";
+    
+    if (isEditing && editingCourse) {
+      setCourses(courses.map(course => 
+        course.id === editingCourse.id 
+          ? { ...course, ...values, image: imagePreview || course.image }
+          : course
+      ));
+      setIsEditing(false);
+      setEditingCourse(null);
+    } else {
+      const newCourse: Course = {
+        id: courses.length + 1,
+        ...values,
+        image: imageUrl,
+      };
+      setCourses([...courses, newCourse]);
+    }
+    
+    form.reset();
+    setImagePreview(null);
+    setIsDialogOpen(false);
   };
 
   const filteredCourses = courses
     .filter((course) =>
       selectedCategory === "all" ? true : course.category === selectedCategory
+    )
+    .filter((course) =>
+      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.mentor.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (priceSort === "asc") {
@@ -195,16 +229,16 @@ export default function Home() {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center flex-1">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px] ">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by Category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem className="cursor-pointer"value="all">All Categories</SelectItem>
+              <SelectItem className="cursor-pointer" value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem  key={category} value={category}>
-                  {category}
+                <SelectItem key={category._id} value={category.name}>
+                  {category.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -220,17 +254,32 @@ export default function Home() {
               <SelectItem value="desc">Price: High to Low</SelectItem>
             </SelectContent>
           </Select>
+
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
-        <Dialog>
+        <Dialog open={isDialogOpen || isEditing} onOpenChange={(open) => {
+          if (!open) {
+            setIsEditing(false);
+            setIsDialogOpen(false);
+          }
+        }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={handleOpenDialog}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Course
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add New Course</DialogTitle>
+              <DialogTitle>{isEditing ? 'Edit Course' : 'Add New Course'}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -260,6 +309,19 @@ export default function Home() {
                           placeholder="99.99"
                           {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="mentor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mentor Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter mentor name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -329,8 +391,8 @@ export default function Home() {
                         </FormControl>
                         <SelectContent>
                           {categories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
+                            <SelectItem key={category._id} value={category.name}>
+                              {category.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -341,7 +403,7 @@ export default function Home() {
                 />
                 
                 <Button type="submit" className="w-full">
-                  Add Course
+                  {isEditing ? 'Update Course' : 'Add Course'}
                 </Button>
               </form>
             </Form>
@@ -371,10 +433,56 @@ export default function Home() {
                   <Tag className="w-4 h-4 mr-1" />
                   {course.category}
                 </div>
+                <div className="flex items-center">
+                  <User className="w-4 h-4 mr-1" />
+                  {course.mentor}
+                </div>
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-between items-center">
               <p className="text-lg font-bold">${course.price}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEdit(course)}
+                >
+                  <FilePenLine className="h-4 w-4 opacity-80" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-red-500 opacity-80" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. Please type "{course.name}" to confirm deletion.
+                        <Input
+                          className="mt-2"
+                          value={deleteConfirmName}
+                          onChange={(e) => setDeleteConfirmName(e.target.value)}
+                          placeholder="Type course name to confirm"
+                        />
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmName("")}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(course.id, course.name)}
+                        className="bg-red-500 hover:bg-red-600"
+                        disabled={deleteConfirmName !== course.name}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </CardFooter>
           </Card>
         ))}

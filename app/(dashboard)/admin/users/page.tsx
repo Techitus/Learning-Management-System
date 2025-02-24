@@ -112,6 +112,7 @@ const users = [
 ]
 
 export default function Users() {
+  
   return (
     <div className="container mx-auto p-4">
       <UserCard users={users} />
