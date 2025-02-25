@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/database/connection";
 import User, { Role } from "@/database/models/user.schema";
 import NextAuth, { Session, NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
+import { AdapterUser } from "next-auth/adapters";
+import { Account, Profile, User as NextAuthUser } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -32,7 +35,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async signIn({ user }: { user: { name: string; email: string; image: string } }): Promise<boolean> {
+    async signIn({ user, account, profile }) {
       try {
         await dbConnect();
         const existingUser = await User.findOne({ email: user.email });

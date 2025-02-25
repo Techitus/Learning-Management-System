@@ -3,7 +3,9 @@ interface ICourse extends Document {
     courseName : string,
     courseDescription : string,
     coursePrice : number,
-    courseDuration : string
+    courseDuration : string,
+    thumbnail : string,
+    mentor : mongoose.Types.ObjectId,  
     category : mongoose.Types.ObjectId,
     lessons : mongoose.Types.ObjectId[],
     createdAt : Date
@@ -12,6 +14,7 @@ const courseSchema = new Schema<ICourse>({
     courseName: {
         type: String,
         required: true,
+        unique : true
     },
     courseDescription : {
         type: String,
@@ -23,18 +26,23 @@ const courseSchema = new Schema<ICourse>({
     courseDuration : {
         type: String,
         required : true
+    },thumbnail : {
+        type: String,
     },
     category: {
         type: Schema.Types.ObjectId,
         ref: "Category",
         required: true,
+    },mentor: {
+        type: Schema.Types.ObjectId,
+        ref: "Users",
     },
-    lessons :[
-        {
-            type: Schema.Types.ObjectId,
-        ref: "Lessons", 
-        }
-    ],
+    // lessons :[
+    //     {
+    //         type: Schema.Types.ObjectId,
+    //     ref: "Lessons", 
+    //     }
+    // ],
     createdAt : {
         type : Date,
         default : Date.now()
