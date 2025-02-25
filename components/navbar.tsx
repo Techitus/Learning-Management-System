@@ -10,16 +10,61 @@ import { motion, AnimatePresence } from "framer-motion";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Role } from "@/database/models/user.schema";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const { data: session,  } = useSession();
+  const { data: session, status } = useSession();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      console.log("Session data:", session);
+    }
+  }, [session, status]);
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (status === "authenticated" && session?.user?.email && !session.user.role) {
+        try {
+          const response = await fetch(`/api/user?email=${encodeURIComponent(session.user.email)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.role) {
+              session.user.role = data.role;
+              
+              if (data.role === Role.Admin) {
+                router.push("/admin");
+              } else if (data.role ===Role.Teacher) {
+                router.push("/teacher");
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
+      }
+    };
+
+    checkUserRole();
+  }, [session, status, router]);
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.role) {
+      const userRole = session.user.role;
+      
+      if (userRole === Role.Admin) {
+        router.push("/admin");
+      } else if (userRole === Role.Teacher) {
+        router.push("/teacher");
+      }
+    }
+  }, [session, status, router]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -57,6 +102,11 @@ export default function Navbar() {
         <DropdownMenuItem className="flex-col items-start">
           <div className="text-sm font-medium">{session?.user?.name}</div>
           <div className="text-xs text-muted-foreground">{session?.user?.email}</div>
+          {session?.user?.role && (
+            <div className="text-xs font-medium text-muted-foreground mt-1">
+              Role: {session.user.role.charAt(0).toUpperCase() + session.user.role.slice(1)}
+            </div>
+          )}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
@@ -100,9 +150,7 @@ export default function Navbar() {
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              Contact
-            </Button>
+            
             {mounted && session ? (
               <UserMenu />
             ) : (
@@ -154,13 +202,7 @@ export default function Navbar() {
                 >
                   About Us
                 </Link>
-                <Link
-                  href="/contact"
-                  className="transition-colors hover:text-primary"
-                  onClick={() => handleLinkClick("/contact")}
-                >
-                  Contact
-                </Link>
+               
                 {mounted && session && (
                   <Button onClick={handleLogout} variant="ghost" className="justify-start px-0">
                     Log out
