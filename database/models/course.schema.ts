@@ -2,7 +2,7 @@ import mongoose,{Schema}from "mongoose";
 interface ICourse extends Document {
     courseName : string,
     courseDescription : string,
-    coursePrice : number,
+    coursePrice : string,
     courseDuration : string,
     thumbnail : string,
     mentor : mongoose.Types.ObjectId,  
@@ -20,7 +20,7 @@ const courseSchema = new Schema<ICourse>({
         type: String,
     },
     coursePrice: {
-        type: Number,
+        type: String,
         required: true,
     },
     courseDuration : {

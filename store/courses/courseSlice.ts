@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { ICourses, ICoursesInitialState } from "./types";
+import {  ICoursesInitialState } from "./types";
 import { Status } from "@/types/status.types";
 import { AppDispatch } from "../store";
 import API from "@/http";
@@ -19,6 +19,8 @@ const courseSlice =createSlice({
         },
         setCourse(state,action){
             state.courses = action.payload;
+        },addCourses(state, action) {
+            state.courses = [...state.courses, action.payload];
         },resetStatus(state){
             state.status = Status.LOADING;
         },updateCoursesInState(state, action) {
@@ -39,7 +41,7 @@ const courseSlice =createSlice({
         }
     }
 })
-export const {setStatus,setCourse,resetStatus,updateCoursesInState,deleteCourseByIndex} = courseSlice.actions
+export const {setStatus,setCourse,resetStatus,addCourses,updateCoursesInState,deleteCourseByIndex} = courseSlice.actions
 
 export default courseSlice.reducer;
 
@@ -61,39 +63,52 @@ export function fetchCourses(){
     }
 }
 
-export function createCourse(data : ICourses){
-    return async function createCourseThunk(dispatch:AppDispatch){
-        try{
-            const response = await API.post('/course',data)
-             if(response.status === 200){
-                 dispatch(setStatus(Status.SUCCESS));
-                 dispatch(setCourse(response.data.data));
-             }else{
-                 dispatch(setStatus(Status.ERROR));
-             }
-        }catch(err){
-            console.error(err);
+export function createCourse(data: FormData) {
+    return async function createCourseThunk(dispatch: AppDispatch) {
+        try {
+            const response = await API.post("/course", data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }); 
+            if (response.status === 200) {
+                dispatch(setStatus(Status.SUCCESS));
+                // dispatch(addCourses(response.data.data));
+                dispatch(fetchCourses())
+            } else {
+                dispatch(setStatus(Status.ERROR));
+            }
+        } catch (err) {
+            console.error("Error creating course:", err);
             dispatch(setStatus(Status.ERROR));
         }
-    }
+    };
 }
 
-export function updateCourse(data : ICourses){  
-    return async function updateCourseThunk(dispatch:AppDispatch){
-        try{
-            const response = await API.patch(`/course/${data._id}`,data)
-             if(response.status === 200){
-                 dispatch(setStatus(Status.SUCCESS));
-                 dispatch(updateCoursesInState(response.data.data));
-             }else{
-                 dispatch(setStatus(Status.ERROR));
-             }
-        }catch(err){
-            console.error(err);
+
+
+export function updateCourse(id: string, data: FormData) {
+    return async function updateCourseThunk(dispatch: AppDispatch) {
+        try {
+            const response = await API.patch(`/course/${id}`, data, {
+                headers: {
+                    "Content-Type": "multipart/form-data", 
+                },
+            });
+
+            if (response.status === 200) {
+                dispatch(setStatus(Status.SUCCESS));
+                dispatch(updateCoursesInState(response.data.data));
+            } else {
+                dispatch(setStatus(Status.ERROR));
+            }
+        } catch (err) {
+            console.error("Error updating course:", err);
             dispatch(setStatus(Status.ERROR));
         }
-    }
+    };
 }
+
 
 export function deleteCourse(id : string){
     return async function deleteCourseThunk(dispatch:AppDispatch){

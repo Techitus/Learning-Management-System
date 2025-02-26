@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
@@ -30,87 +29,129 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Clock, Tag, Upload, FilePenLine, Trash2, User, Search } from "lucide-react";
+import { PlusCircle, Clock, Tag, FilePenLine, Trash2, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image, { StaticImageData } from "next/image";
-import web from '@/Images/web.jpeg'
-import app from '@/Images/app.jpeg'
+import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchCategories } from "@/store/category/categorySlice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { fetchCourses } from "@/store/courses/courseSlice";
+import { 
+  fetchCourses, 
+  createCourse, 
+  updateCourse, 
+  deleteCourse 
+} from "@/store/courses/courseSlice";
+import { Status } from "@/types/status.types";
+import toast, { Toaster } from "react-hot-toast";
+import { Role } from "@/database/models/user.schema";
+import { fetchUsers } from "@/store/users/userSlice";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Course name is required"),
-  price: z.string().min(1, "Price is required"),
-  description: z.string(),
-  duration: z.string().min(1, "Duration is required"),
+  courseName: z.string().min(1, "Course name is required"),
+  coursePrice: z.string().min(1, "Price is required"),
+  courseDescription: z.string().min(1, "Description is required"),
+  courseDuration: z.string().min(1, "Duration is required"),
   category: z.string().min(1, "Category is required"),
-  mentor: z.string().min(1, "Mentor name is required"),
-  image: z.instanceof(File, { message: "Image is required" }).optional(),
+  mentor: z.string().min(1, "Mentor is required"),
+  thumbnail: z.instanceof(File, { message: "Image is required" }).optional(),
 });
+
 type Mentor = {
-  username: string;
-  _id: string; // Assuming mentor has an ID
-};
+  _id: string,
+  username: string
+}
 
 type Category = {
-  name: string;
-  _id: string;
-};
+  _id: string,
+  name: string
+}
 
-type Course = {
-  id: number;
-  name: string;
-  price: string;
-  description: string;
-  duration: string;
+type ICourses = {
+  _id?: string;
+  courseName: string;
+  coursePrice: string; 
+  courseDescription: string;
+  courseDuration: string;
   category: Category;
-  mentor: Mentor; // Updated mentor type to be an object
-  image: any;
+  mentor: Mentor;
+  thumbnail: any;
 };
-
 
 export default function Home() {
-  const {categories} = useAppSelector((state)=>state.categories)
-  const dispatch = useAppDispatch()
+  const { categories } = useAppSelector((state) => state.categories);
+  const { courses, status } = useAppSelector((state) => state.courses);
+  const dispatch = useAppDispatch();
+  
   const [isEditing, setIsEditing] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [editingCourse, setEditingCourse] = useState<ICourses | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceSort, setPriceSort] = useState<"asc" | "desc" | "none">("none");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  useEffect(()=>{
-    dispatch(fetchCategories())
-  },[])
+  useEffect(() => {
+   
+    dispatch(fetchCategories());
+    dispatch(fetchCourses());
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
-  
-const {courses} = useAppSelector((state)=>state.courses)
-
-useEffect(()=>{
-  dispatch(fetchCourses())
-},[dispatch])
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      price: "",
-      description: "",
-      duration: "",
+      courseName: "",
+      coursePrice: "",
+      courseDescription: "",
+      courseDuration: "",
       category: "",
       mentor: "",
     },
   });
 
+  useEffect(() => {
+    if (status === Status.SUCCESS && isSubmitting) {
+      
+      setIsDialogOpen(false);
+      setIsEditing(false);
+      setEditingCourse(null);
+      form.reset();
+      setImagePreview(null);
+      setIsSubmitting(false);
+      
+      
+      toast.success(isEditing ? "Course updated successfully!" : "Course created successfully!", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
+      
+      
+      dispatch(fetchCourses());
+    } else if (status === Status.ERROR && isSubmitting) {
+      setIsSubmitting(false);
+      
+      toast.error("Something went wrong. Please try again.", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
+    }
+  }, [status, isSubmitting, dispatch, form, isEditing]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
+      form.setValue("thumbnail", file);
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -126,74 +167,84 @@ useEffect(()=>{
     setIsDialogOpen(true);
   };
 
-  // const handleEdit = (course: Course) => {
-  //   setIsEditing(true);
-  //   setEditingCourse(course);
-  //   form.reset({
-  //     name: course.name,
-  //     price: course.price,
-  //     description: course.description,
-  //     duration: course.duration,
-  //     category: course.category,
-  //     mentor: course.mentor,
-  //   });
-  // };
-
-  // const handleDelete = (courseId: number, courseName: string) => {
-  //   if (deleteConfirmName === courseName) {
-  //     setCourses(courses.filter(course => course.id !== courseId));
-  //     setDeleteConfirmName("");
-  //   }
-  // };
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const imageUrl = imagePreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3";
+  const handleEdit = (course: ICourses) => {
+    setIsEditing(true);
+    setEditingCourse(course);
     
-    // if (isEditing && editingCourse) {
-    //   setCourses(courses.map(course => 
-    //     course.id === editingCourse.id 
-    //       ? { ...course, ...values, image: imagePreview || course.image }
-    //       : course
-    //   ));
-    //   setIsEditing(false);
-    //   setEditingCourse(null);
-    // } else {
-    //   const newCourse: Course = {
-    //     id: courses.length + 1,
-    //     ...values,
-    //     image: imageUrl,
-    //   };
-    //   setCourses([...courses, newCourse]);
-    // }
+    form.reset({
+      courseName: course.courseName,
+      coursePrice: course.coursePrice,
+      courseDescription: course.courseDescription,
+      courseDuration: course.courseDuration,
+      category: course.category._id,
+      mentor: course.mentor._id,
+    });
     
-    form.reset();
-    setImagePreview(null);
-    setIsDialogOpen(false);
+    setImagePreview(course.thumbnail);
+    setIsDialogOpen(true);
   };
 
-  // const filteredCourses = courses
-  //   .filter((course) =>
-  //     selectedCategory === "all" ? true : course.category === selectedCategory
-  //   )
-  //   .filter((course) =>
-  //     course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     course.mentor.toLowerCase().includes(searchQuery.toLowerCase())
-  //   )
-  //   .sort((a, b) => {
-  //     if (priceSort === "asc") {
-  //       return parseFloat(a.price) - parseFloat(b.price);
-  //     }
-  //     if (priceSort === "desc") {
-  //       return parseFloat(b.price) - parseFloat(a.price);
-  //     }
-  //     return 0;
-  //   });
+  const handleDelete = (courseId: string) => {
+    dispatch(deleteCourse(courseId));
+    setDeleteConfirmName("");
+    
+    toast.success("Course deleted successfully!", {
+      style: {
+        borderRadius: "10px",
+        background: "#000",
+        color: "#fff",
+      },
+    });
+    
+    setTimeout(() => {
+      dispatch(fetchCourses());
+    }, 200);
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsSubmitting(true);
+    
+    const formData = new FormData();
+    formData.append("courseName", values.courseName);
+    formData.append("coursePrice", values.coursePrice);
+    formData.append("courseDescription", values.courseDescription);
+    formData.append("courseDuration", values.courseDuration);
+    formData.append("category", values.category);
+    formData.append("mentor", values.mentor);
+    
+    if (values.thumbnail instanceof File) {
+      formData.append("thumbnail", values.thumbnail);
+    }
+    
+    if (isEditing && editingCourse?._id) {
+      formData.append("_id", editingCourse._id);
+      dispatch(updateCourse(editingCourse._id,formData as any));
+    } else {
+      dispatch(createCourse(formData as any));
+    }
+  };
+
+  const filteredCourses = courses
+    .filter((course) =>
+      selectedCategory === "all" ? true : course.category.name === selectedCategory
+    )
+    .sort((a, b) => {
+      if (priceSort === "asc") {
+        return parseFloat(String(a.coursePrice)) - parseFloat(String(b.coursePrice));
+      }
+      if (priceSort === "desc") {
+        return parseFloat(String(b.coursePrice)) - parseFloat(String(a.coursePrice));
+      }
+      return 0;
+    });
+
+  const {users} = useAppSelector((state) => state.users);
+  const mentors = users.filter((user) => user.role === Role.Teacher);
 
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <div className="flex gap-4 items-center flex-1">
+        <div className="flex gap-4 items-center">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by Category" />
@@ -218,22 +269,17 @@ useEffect(()=>{
               <SelectItem value="desc">Price: High to Low</SelectItem>
             </SelectContent>
           </Select>
-
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          
+          
         </div>
 
-        <Dialog open={isDialogOpen || isEditing} onOpenChange={(open) => {
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
           if (!open) {
             setIsEditing(false);
             setIsDialogOpen(false);
+            setEditingCourse(null);
+            form.reset();
+            setImagePreview(null);
           }
         }}>
           <DialogTrigger asChild>
@@ -249,7 +295,7 @@ useEffect(()=>{
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="courseName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Course Name</FormLabel>
@@ -262,15 +308,14 @@ useEffect(()=>{
                 />
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="coursePrice"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Price</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          step="0.01"
-                          placeholder="99.99"
+                          placeholder="999"
                           {...field}
                         />
                       </FormControl>
@@ -283,35 +328,60 @@ useEffect(()=>{
                   name="mentor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mentor Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter mentor name" {...field} />
-                      </FormControl>
+                      <FormLabel>Mentor</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select mentor" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {mentors.map((mentor) => (
+                            <SelectItem key={mentor._id} value={mentor._id}>
+                              {mentor.username}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="image"
-                  render={({ field }) => (
+                  name="thumbnail"
+                  render={({ field: { value, onChange, ...field } }) => (
                     <FormItem>
                       <FormLabel>Cover Image</FormLabel>
                       <FormControl>
                         <Input
                           type="file"
-                          name="image"
+                          accept="image/*"
                           onChange={handleFileChange}
-                          disabled={false}
+                          {...field}
                         />
                       </FormControl>
+                      {imagePreview && (
+                        <div className="mt-2">
+                          <Image 
+                            src={imagePreview} 
+                            alt="Preview" 
+                            height={100} 
+                            width={200} 
+                            className="object-cover rounded" 
+                          />
+                        </div>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="courseDescription"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
@@ -327,7 +397,7 @@ useEffect(()=>{
                 />
                 <FormField
                   control={form.control}
-                  name="duration"
+                  name="courseDuration"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Duration</FormLabel>
@@ -355,7 +425,7 @@ useEffect(()=>{
                         </FormControl>
                         <SelectContent>
                           {categories.map((category) => (
-                            <SelectItem key={category._id} value={category.name}>
+                            <SelectItem key={category._id} value={category._id}>
                               {category.name}
                             </SelectItem>
                           ))}
@@ -366,8 +436,12 @@ useEffect(()=>{
                   )}
                 />
                 
-                <Button type="submit" className="w-full">
-                  {isEditing ? 'Update Course' : 'Add Course'}
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isSubmitting || status === Status.LOADING}
+                >
+                  {isSubmitting ? 'Please wait...' : isEditing ? 'Update Course' : 'Add Course'}
                 </Button>
               </form>
             </Form>
@@ -376,10 +450,12 @@ useEffect(()=>{
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
+        {filteredCourses.length > 0 ? filteredCourses.map((course) => (
           <Card key={course._id} className="overflow-hidden">
-            <Image height={0} width={0}
-              src={course.thumbnail}
+            <Image 
+              height={192}
+              width={384}
+              src={course.thumbnail ? course.thumbnail : '/placeholder.png'}
               alt={course.courseName}
               className="w-full h-48 object-cover"
             />
@@ -404,12 +480,12 @@ useEffect(()=>{
               </div>
             </CardContent>
             <CardFooter className="flex justify-between items-center">
-              <p className="text-lg font-bold">${course.coursePrice}</p>
+              <p className="text-lg font-bold">Rs.{course.coursePrice}</p>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
-                  // onClick={() => handleEdit(course)}
+                  onClick={() => handleEdit(course)}
                 >
                   <FilePenLine className="h-4 w-4 opacity-80" />
                 </Button>
@@ -437,8 +513,8 @@ useEffect(()=>{
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        // onClick={() => handleDelete(course.id, course.name)}
-                        className="bg-red-500 hover:bg-red-600"
+                        onClick={() => handleDelete(course._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white"
                         disabled={deleteConfirmName !== course.courseName}
                       >
                         Delete
@@ -449,8 +525,14 @@ useEffect(()=>{
               </div>
             </CardFooter>
           </Card>
-        ))}
+        )) : (
+          <div className="col-span-3 flex items-center justify-center py-12">
+            <p className="text-gray-600">No courses found.</p>
+          </div>
+        )}
       </div>
+      <Toaster  position="bottom-right"
+  reverseOrder={false} />
     </div>
   );
 }

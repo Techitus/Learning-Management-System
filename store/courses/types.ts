@@ -11,7 +11,7 @@ export interface ICourses{
     _id : string,
     courseName : string,
     courseDescription : string,
-    coursePrice : number,
+    coursePrice : string,
     courseDuration : string,
     thumbnail : string,
     mentor : Mentor,
