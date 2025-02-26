@@ -6,7 +6,7 @@ import API from "@/http";
 
 
 const courseDatas: ICoursesInitialState = {
-    courses: [],
+    courses: [] ,
     status: Status.LOADING,
 };
 

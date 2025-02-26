@@ -1,5 +1,12 @@
 import { Status } from "@/types/status.types";
-
+type Mentor ={
+    _id : string,
+    username : string
+}
+type Category ={
+    _id : string,
+    name : string
+}
 export interface ICourses{
     _id : string,
     courseName : string,
@@ -7,8 +14,8 @@ export interface ICourses{
     coursePrice : number,
     courseDuration : string,
     thumbnail : string,
-    mentor : string,
-    category : string
+    mentor : Mentor,
+    category : Category
     createdAt : string,
 }
 export interface ICoursesInitialState {

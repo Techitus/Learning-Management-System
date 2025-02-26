@@ -41,6 +41,7 @@ import app from '@/Images/app.jpeg'
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchCategories } from "@/store/category/categorySlice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { fetchCourses } from "@/store/courses/courseSlice";
 
 const formSchema = z.object({
   name: z.string().min(1, "Course name is required"),
@@ -51,6 +52,15 @@ const formSchema = z.object({
   mentor: z.string().min(1, "Mentor name is required"),
   image: z.instanceof(File, { message: "Image is required" }).optional(),
 });
+type Mentor = {
+  username: string;
+  _id: string; // Assuming mentor has an ID
+};
+
+type Category = {
+  name: string;
+  _id: string;
+};
 
 type Course = {
   id: number;
@@ -58,10 +68,11 @@ type Course = {
   price: string;
   description: string;
   duration: string;
-  category: string;
-  mentor: string;
+  category: Category;
+  mentor: Mentor; // Updated mentor type to be an object
   image: any;
 };
+
 
 export default function Home() {
   const {categories} = useAppSelector((state)=>state.categories)
@@ -79,59 +90,12 @@ export default function Home() {
     dispatch(fetchCategories())
   },[])
 
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: 1,
-      name: "Modern Web Development",
-      price: "99.99",
-      description: "Learn modern web development with React and Next.js",
-      duration: "12 weeks",
-      category: "Web Development",
-      mentor: "John Doe",
-      image: web,
-    },
-    {
-      id: 2,
-      name: "iOS App Development",
-      price: "149.99",
-      description: "Build iOS apps with Swift",
-      duration: "16 weeks",
-      category: "Mobile Development",
-      mentor: "Jane Smith",
-      image: app,
-    },
-    {
-      id: 3,
-      name: "iOS App Development",
-      price: "149.99",
-      description: "Build iOS apps with Swift",
-      duration: "16 weeks",
-      category: "Mobile Development",
-      mentor: "Jane Smith",
-      image: app,
-    },
-    {
-      id: 4,
-      name: "iOS App Development",
-      price: "149.99",
-      description: "Build iOS apps with Swift",
-      duration: "16 weeks",
-      category: "Mobile Development",
-      mentor: "Jane Smith",
-      image: app,
-    },
-    {
-      id: 5,
-      name: "iOS App Development",
-      price: "149.99",
-      description: "Build iOS apps with Swift",
-      duration: "16 weeks",
-      category: "Mobile Development",
-      mentor: "Jane Smith",
-      image: web,
-    },
-  ]);
+  
+const {courses} = useAppSelector((state)=>state.courses)
 
+useEffect(()=>{
+  dispatch(fetchCourses())
+},[dispatch])
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -162,69 +126,69 @@ export default function Home() {
     setIsDialogOpen(true);
   };
 
-  const handleEdit = (course: Course) => {
-    setIsEditing(true);
-    setEditingCourse(course);
-    form.reset({
-      name: course.name,
-      price: course.price,
-      description: course.description,
-      duration: course.duration,
-      category: course.category,
-      mentor: course.mentor,
-    });
-  };
+  // const handleEdit = (course: Course) => {
+  //   setIsEditing(true);
+  //   setEditingCourse(course);
+  //   form.reset({
+  //     name: course.name,
+  //     price: course.price,
+  //     description: course.description,
+  //     duration: course.duration,
+  //     category: course.category,
+  //     mentor: course.mentor,
+  //   });
+  // };
 
-  const handleDelete = (courseId: number, courseName: string) => {
-    if (deleteConfirmName === courseName) {
-      setCourses(courses.filter(course => course.id !== courseId));
-      setDeleteConfirmName("");
-    }
-  };
+  // const handleDelete = (courseId: number, courseName: string) => {
+  //   if (deleteConfirmName === courseName) {
+  //     setCourses(courses.filter(course => course.id !== courseId));
+  //     setDeleteConfirmName("");
+  //   }
+  // };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const imageUrl = imagePreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3";
     
-    if (isEditing && editingCourse) {
-      setCourses(courses.map(course => 
-        course.id === editingCourse.id 
-          ? { ...course, ...values, image: imagePreview || course.image }
-          : course
-      ));
-      setIsEditing(false);
-      setEditingCourse(null);
-    } else {
-      const newCourse: Course = {
-        id: courses.length + 1,
-        ...values,
-        image: imageUrl,
-      };
-      setCourses([...courses, newCourse]);
-    }
+    // if (isEditing && editingCourse) {
+    //   setCourses(courses.map(course => 
+    //     course.id === editingCourse.id 
+    //       ? { ...course, ...values, image: imagePreview || course.image }
+    //       : course
+    //   ));
+    //   setIsEditing(false);
+    //   setEditingCourse(null);
+    // } else {
+    //   const newCourse: Course = {
+    //     id: courses.length + 1,
+    //     ...values,
+    //     image: imageUrl,
+    //   };
+    //   setCourses([...courses, newCourse]);
+    // }
     
     form.reset();
     setImagePreview(null);
     setIsDialogOpen(false);
   };
 
-  const filteredCourses = courses
-    .filter((course) =>
-      selectedCategory === "all" ? true : course.category === selectedCategory
-    )
-    .filter((course) =>
-      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.mentor.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (priceSort === "asc") {
-        return parseFloat(a.price) - parseFloat(b.price);
-      }
-      if (priceSort === "desc") {
-        return parseFloat(b.price) - parseFloat(a.price);
-      }
-      return 0;
-    });
+  // const filteredCourses = courses
+  //   .filter((course) =>
+  //     selectedCategory === "all" ? true : course.category === selectedCategory
+  //   )
+  //   .filter((course) =>
+  //     course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     course.mentor.toLowerCase().includes(searchQuery.toLowerCase())
+  //   )
+  //   .sort((a, b) => {
+  //     if (priceSort === "asc") {
+  //       return parseFloat(a.price) - parseFloat(b.price);
+  //     }
+  //     if (priceSort === "desc") {
+  //       return parseFloat(b.price) - parseFloat(a.price);
+  //     }
+  //     return 0;
+  //   });
 
   return (
     <div className="container mx-auto py-8">
@@ -412,40 +376,40 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.map((course) => (
-          <Card key={course.id} className="overflow-hidden">
+        {courses.map((course) => (
+          <Card key={course._id} className="overflow-hidden">
             <Image height={0} width={0}
-              src={course.image}
-              alt={course.name}
+              src={course.thumbnail}
+              alt={course.courseName}
               className="w-full h-48 object-cover"
             />
             <CardHeader>
-              <h3 className="text-xl font-semibold">{course.name}</h3>
+              <h3 className="text-xl font-semibold">{course.courseName}</h3>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">{course.description}</p>
+              <p className="text-gray-600 mb-4">{course.courseDescription}</p>
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {course.duration}
+                  {course.courseDuration}
                 </div>
                 <div className="flex items-center">
                   <Tag className="w-4 h-4 mr-1" />
-                  {course.category}
+                  {course.category.name}
                 </div>
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-1" />
-                  {course.mentor}
+                  {course.mentor.username}
                 </div>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between items-center">
-              <p className="text-lg font-bold">${course.price}</p>
+              <p className="text-lg font-bold">${course.coursePrice}</p>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleEdit(course)}
+                  // onClick={() => handleEdit(course)}
                 >
                   <FilePenLine className="h-4 w-4 opacity-80" />
                 </Button>
@@ -459,7 +423,7 @@ export default function Home() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. Please type "{course.name}" to confirm deletion.
+                        This action cannot be undone. Please type "{course.courseName}" to confirm deletion.
                         <Input
                           className="mt-2"
                           value={deleteConfirmName}
@@ -473,9 +437,9 @@ export default function Home() {
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleDelete(course.id, course.name)}
+                        // onClick={() => handleDelete(course.id, course.name)}
                         className="bg-red-500 hover:bg-red-600"
-                        disabled={deleteConfirmName !== course.name}
+                        disabled={deleteConfirmName !== course.courseName}
                       >
                         Delete
                       </AlertDialogAction>

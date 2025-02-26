@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   Layers,
   Maximize,
+  Atom,
   CircleUser,
   Store
 } from 'lucide-react';
@@ -29,6 +30,7 @@ const ICON_MAP = {
   'GraduationCap': GraduationCap,
   'Layers': Layers,
   'CircleUser': CircleUser,
+  'Atom ' : Atom,
   'Store': Store,
 } as const;
 

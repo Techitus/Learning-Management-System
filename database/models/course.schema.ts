@@ -35,7 +35,7 @@ const courseSchema = new Schema<ICourse>({
         required: true,
     },mentor: {
         type: Schema.Types.ObjectId,
-        ref: "Users",
+        ref: "User",
     },
     // lessons :[
     //     {
@@ -50,5 +50,6 @@ const courseSchema = new Schema<ICourse>({
 
 })
 
-const Courses =mongoose.models.Course ||mongoose.model("courses", courseSchema)
+const Courses = mongoose.models.courses || mongoose.model("courses", courseSchema);
+
 export default Courses
