@@ -30,7 +30,7 @@ const ICON_MAP = {
   'GraduationCap': GraduationCap,
   'Layers': Layers,
   'CircleUser': CircleUser,
-  'Atom ' : Atom,
+  'Atom' : Atom,
   'Store': Store,
 } as const;
 

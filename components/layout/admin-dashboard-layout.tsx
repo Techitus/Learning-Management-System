@@ -9,7 +9,7 @@ const adminSidebarLinks = [
   { name: 'Users', href: '/admin/users', icon: 'CircleUser' },
   { name: 'Teachers', href: '/admin/teachers', icon: 'GraduationCap' },
   { name: 'Students', href: '/admin/students', icon: 'Users' },
-  // { name: 'Enrollment', href: '/admin/enrollment', icon: 'Atom' },
+  { name: 'Enrollment', href: '/admin/enrollment', icon: 'Atom' },
   { name: 'About Us', href: '/admin/about', icon: 'Store' },
 ] as const;
 
