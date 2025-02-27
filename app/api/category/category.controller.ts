@@ -5,8 +5,12 @@ import { NextRequest } from "next/server"
 
 export async function createCategory(request: Request){
    try{
-    authMiddleware(request as NextRequest)
-
+ const authResponse =  await authMiddleware(request as NextRequest)
+      if(!authResponse){
+        return Response.json({
+            message : "You are not authorized to perform this action 😒"
+        },{status:401})
+    }
     await dbConnect()
     const {name} = await request.json()
     const existingCategory = await Category.findOne({name: name})
@@ -51,7 +55,12 @@ export async function getCategories(){
 export async function deleteCategory(id:string ,request: Request){
     try{
        await dbConnect()
-       authMiddleware(request as NextRequest) 
+       const authResponse =  await authMiddleware(request as NextRequest)
+      if(!authResponse){
+        return Response.json({
+            message : "You are not authorized to perform this action 😒"
+        },{status:401})
+    }
      const deleted = await Category.findByIdAndDelete(id)
      if(!deleted){
         return Response.json({
@@ -72,7 +81,12 @@ export async function deleteCategory(id:string ,request: Request){
 export async function updateCategory(id: string, request: Request) {
     try {
         await dbConnect();
-        authMiddleware(request as NextRequest);
+        const authResponse =  await authMiddleware(request as NextRequest)
+      if(!authResponse){
+        return Response.json({
+            message : "You are not authorized to perform this action 😒"
+        },{status:401})
+    }
 
         const { name } = await request.json();
 

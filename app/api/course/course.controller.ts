@@ -9,12 +9,17 @@ import User from "@/database/models/user.schema";
 import dbConnect from "@/database/connection";
 import { authMiddleware } from "@/middleware/auth.middleware";
 
-export async function createCourse(req: Request) {
+export async function createCourse(request: Request) {
   try {
     await dbConnect();
-    await authMiddleware(req as NextRequest);
+    const authResponse =  await authMiddleware(request as NextRequest)
+    if(!authResponse){
+      return Response.json({
+          message : "You are not authorized to perform this action 😒"
+      },{status:401})
+  }
 
-    const formData = await req.formData();
+    const formData = await request.formData();
     const courseName = formData.get("courseName") as string;
     const courseDescription = formData.get("courseDescription") as string;
     const coursePrice = parseFloat(formData.get("coursePrice") as string);
@@ -79,10 +84,15 @@ export async function fetchCourses(req: Request) {
   }
 }
 
-export async function deleteCourse(id: string, req: Request) {
+export async function deleteCourse(id: string, request: Request) {
   try {
     await dbConnect();
-    await authMiddleware(req as NextRequest);
+    const authResponse =  await authMiddleware(request as NextRequest)
+      if(!authResponse){
+        return Response.json({
+            message : "You are not authorized to perform this action 😒"
+        },{status:401})
+    }
     const deleted = await Courses.findByIdAndDelete(id);
 
     if (!deleted) {
@@ -98,11 +108,16 @@ export async function deleteCourse(id: string, req: Request) {
   }
 }
 
-export async function updateCourse(id: string, req: Request) {
+export async function updateCourse(id: string, request: Request) {
   try {
     await dbConnect();
-    await authMiddleware(req as NextRequest);
-    const formData = await req.formData();
+    const authResponse =  await authMiddleware(request as NextRequest)
+    if(!authResponse){
+      return Response.json({
+          message : "You are not authorized to perform this action 😒"
+      },{status:401})
+  }
+    const formData = await request.formData();
     const courseName = formData.get("courseName") as string;
     const courseDescription = formData.get("courseDescription") as string;
     const coursePrice = parseFloat(formData.get("coursePrice") as string);

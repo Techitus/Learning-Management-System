@@ -19,5 +19,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
 
  },[session,status])
+ if(status === 'loading' || status === 'unauthenticated' ) return <p className='text-center'>loading....</p>
   return <DashboardLayout>{children}</DashboardLayout>;
 }
