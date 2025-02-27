@@ -3,6 +3,7 @@ import mongoose,{Schema} from "mongoose";
 interface IEnrollment extends Document {
      student : mongoose.Types.ObjectId,
      course : mongoose.Types.ObjectId,
+       whatsapp : string,
      enrollAt : Date,
 }
 
@@ -14,6 +15,10 @@ const enrollmentSchema = new Schema<IEnrollment>({
          course : {
             type : Schema.Types.ObjectId,
             ref: "Course"
+         },
+         whatsapp :{
+            type : String,
+            required : true
          },
          enrollAt : {
             type : Date,
