@@ -47,10 +47,14 @@ export async function createNotes(request: Request) {
     }
   }
 
-  export async function fetchNotes() {
+  export async function fetchNotes(request:Request) {
     try {
+      const {searchParams} = new URL(request.url)
+      const courseId = searchParams.get('courseId')
       await dbConnect();
-      const courses = await Notes.find()
+      const courses = await Notes.find({
+        course : courseId
+      }).populate('course')
       if (courses.length === 0) {
         return NextResponse.json({ message: "No notes found 🥴" }, { status: 404 });
       }

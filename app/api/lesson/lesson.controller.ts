@@ -112,24 +112,3 @@ export async function deleteLesson(id:string, request: Request){
     }
 }
 
-export async function fetchLessonById(id:string){
-    try{
-       await dbConnect()
-       const lesson = await Lessons.findById(id)
-       if(!lesson){
-           return Response.json({
-               message : "Lesson not found 😴"
-           },{status:404})
-       }
-       return Response.json({
-           message : "Single Lesson fetched successfully 🥰",
-           data : lesson
-       })
-    }catch(err){
-        console.log(err)
-        return Response.json({
-            message : "Internal server error 🙃",
-          
-        },{status : 500})
-    }
-}
