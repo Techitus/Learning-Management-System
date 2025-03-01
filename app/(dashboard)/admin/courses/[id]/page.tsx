@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import NotesTab from "@/components/notes-tab";
 import LessonsTab from "@/components/lesson-tab";
 
+
 export default function LearningTabs() {
+   
   return (
     <Tabs defaultValue="lessons" className="w-full">
       <div className="flex justify-between items-center mb-4">

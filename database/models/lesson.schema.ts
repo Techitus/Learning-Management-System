@@ -28,5 +28,5 @@ const lessonSchema = new Schema<ILesson>({
         default : Date.now()
        }
 })
-const Lessons = mongoose.model('Lesson', lessonSchema)
+const Lessons = mongoose.models.lessons ||mongoose.model('Lesson', lessonSchema)
 export default Lessons

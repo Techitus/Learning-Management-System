@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,19 +9,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Video, PlusCircle } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useParams } from "next/navigation";
+import { fetchLessons } from "@/store/Lessons/lessonSlice";
 
 export default function LessonsTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [lessons, setLessons] = useState([
-    { id: 1, title: "Introduction to React", description: "Learn the basics of React", videoUrl: "https://example.com/video1.mp4" },
-    { id: 2, title: "Advanced JavaScript", description: "Deep dive into JavaScript concepts", videoUrl: "https://example.com/video2.mp4" },
-  ]);
+  const dispatch = useAppDispatch();
+  const data = useParams()
+  const courseId = data.id
+  const {lessons} = useAppSelector((state)=>state.lessons)
+  console.log(lessons)
+  useEffect(() => {
+      dispatch(fetchLessons(courseId as string))
+  }, [courseId])
+  
 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {lessons.map((lesson) => (
-          <Card key={lesson.id} className="overflow-hidden">
+          <Card key={lesson._id} className="overflow-hidden">
             <CardHeader className="relative pb-0">
               <div className="absolute top-2 right-2">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">

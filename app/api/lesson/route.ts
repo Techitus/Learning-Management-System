@@ -4,6 +4,6 @@ export async function POST(request:Request){
     return createLessons(request)
 }
 
-export async function GET(){
-    return fetchLessons()
+export async function GET(request:Request){
+    return fetchLessons(request)
 }

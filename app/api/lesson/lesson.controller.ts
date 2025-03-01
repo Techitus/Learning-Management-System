@@ -32,10 +32,14 @@ export async function createLessons(request:Request){
     }
 }
 
-export async function fetchLessons(){
+export async function fetchLessons(request:Request){
     try{
      await dbConnect()
-     const response = await Lessons.find()
+   const {searchParams} =  new URL(request.url)
+    const courseId = searchParams.get('courseId')
+     const response = await Lessons.find({
+        course: courseId
+     }).populate('course')
      return Response.json({
          message : "Lessons fetched successfully 😍",
          data : response
