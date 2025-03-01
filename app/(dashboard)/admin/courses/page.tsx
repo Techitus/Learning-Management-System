@@ -48,6 +48,7 @@ import { Status } from "@/types/status.types";
 import toast, { Toaster } from "react-hot-toast";
 import { Role } from "@/database/models/user.schema";
 import { fetchUsers } from "@/store/users/userSlice";
+import Link from "next/link";
 
 const formSchema = z.object({
   courseName: z.string().min(1, "Course name is required"),
@@ -452,6 +453,7 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.length > 0 ? filteredCourses.map((course) => (
           <Card key={course._id} className="overflow-hidden">
+
             <Image 
               height={192}
               width={384}
@@ -460,7 +462,9 @@ export default function Home() {
               className="w-full h-48 object-cover"
             />
             <CardHeader>
+              <Link href={`/admin/courses/${course._id}`}>
               <h3 className="text-xl font-semibold">{course.courseName}</h3>
+              </Link>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">{course.courseDescription}</p>

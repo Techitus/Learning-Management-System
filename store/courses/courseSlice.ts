@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice} from "@reduxjs/toolkit";
 import {  ICoursesInitialState } from "./types";
 import { Status } from "@/types/status.types";
 import { AppDispatch } from "../store";
@@ -20,7 +20,7 @@ const courseSlice =createSlice({
         setCourse(state,action){
             state.courses = action.payload;
         },addCourses(state, action) {
-            state.courses = [...state.courses, action.payload];
+            state.courses.push(action.payload);
         },resetStatus(state){
             state.status = Status.LOADING;
         },updateCoursesInState(state, action) {
@@ -73,8 +73,8 @@ export function createCourse(data: FormData) {
             }); 
             if (response.status === 200) {
                 dispatch(setStatus(Status.SUCCESS));
-                // dispatch(addCourses(response.data.data));
-                dispatch(fetchCourses())
+                // dispatch(fetchCourses())
+                dispatch(addCourses(response.data.data));
             } else {
                 dispatch(setStatus(Status.ERROR));
             }
