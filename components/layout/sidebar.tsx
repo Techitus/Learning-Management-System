@@ -10,6 +10,7 @@ import {
   Layers,
   Maximize,
   Atom,
+  TableOfContents,
   CircleUser,
   Store
 } from 'lucide-react';
@@ -32,6 +33,8 @@ const ICON_MAP = {
   'CircleUser': CircleUser,
   'Atom' : Atom,
   'Store': Store,
+  'TableOfContents': TableOfContents,
+  
 } as const;
 
 type IconName = keyof typeof ICON_MAP;

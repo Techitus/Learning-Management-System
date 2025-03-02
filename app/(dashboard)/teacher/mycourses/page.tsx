@@ -3,8 +3,6 @@
 "use client";
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-
-
 import {
   Select,
   SelectContent,
@@ -18,7 +16,8 @@ import Image, { StaticImageData } from "next/image";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchCourses } from "@/store/courses/courseSlice";
 import { fetchCategories } from "@/store/category/categorySlice";
-
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 type Mentor = {
   _id: string,
@@ -51,6 +50,9 @@ export default function Home() {
   
 
   const {courses} = useAppSelector((state)=>state.courses)
+  const {users} = useAppSelector((state) => state.users);
+  const { data: session } = useSession();
+  const loggedInUsername = session?.user?.name;
 const dispatch = useAppDispatch()
   useEffect(()=>{
     dispatch(fetchCourses())
@@ -62,7 +64,7 @@ const dispatch = useAppDispatch()
      const filteredCourses = courses
      .filter((course) =>
        selectedCategory === "all" ? true : course.category.name === selectedCategory
-     )
+     ).filter((course) => course.mentor.username === loggedInUsername)
      .sort((a, b) => {
        if (priceSort === "asc") {
          return parseFloat(String(a.coursePrice)) - parseFloat(String(b.coursePrice));
@@ -72,7 +74,6 @@ const dispatch = useAppDispatch()
        }
        return 0;
      });
-     const {users} = useAppSelector((state) => state.users);
 
 
   return (
@@ -120,7 +121,9 @@ const dispatch = useAppDispatch()
               className="w-full h-48 object-cover"
             />
             <CardHeader>
-              <h3 className="text-xl font-semibold">{course.courseName}</h3>
+                <Link href={`/teacher/courses/${course._id}`}>
+                  <h3 className="text-xl font-semibold">{course.courseName}</h3>
+                </Link>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">{course.courseDescription}</p>

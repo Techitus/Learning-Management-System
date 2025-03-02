@@ -6,6 +6,7 @@ const teacherSidebarLinks = [
   { name: 'Home', href: '/teacher', icon: 'Home' },
   { name: 'Categories', href: '/teacher/categories', icon: 'Layers' },
   { name: 'Courses', href: '/teacher/courses', icon: 'BookOpen' },
+  { name: 'My Courses', href: '/teacher/mycourses', icon: 'TableOfContents' },
   { name: 'Students', href: '/teacher/students', icon: 'Users' },
   { name: 'About Us', href: '/admin/about', icon: 'Store' },
 ] as const;
