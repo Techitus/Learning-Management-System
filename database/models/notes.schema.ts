@@ -18,5 +18,5 @@ const notesSchema = new Schema<INotes>({
         default : Date.now()
        }
 })
-const Notes = mongoose.model('Notes', notesSchema)
+const Notes =mongoose.models.notes || mongoose.model('Notes', notesSchema)
 export default Notes

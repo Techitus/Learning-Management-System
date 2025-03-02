@@ -69,7 +69,8 @@ export async function updateLesson(id:string,request: Request){
         },{new:true})
         if(!lesson){
             return Response.json({
-                message : "Lesson not found 😴"
+                message : "Lesson not found 😴",
+                
             },{status:404})
         }
         return Response.json({

@@ -43,6 +43,7 @@ export function fetchLessons(id:string){
             if(response.status == 200){
                 dispatch(setLesson(response.data.data))
             }else{
+                dispatch(setLesson([]))
                 dispatch(setStatus(Status.ERROR))
             }
         } catch (error) {

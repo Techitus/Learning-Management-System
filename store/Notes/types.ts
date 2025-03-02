@@ -1,7 +1,7 @@
 import { Status } from "@/types/status.types";
 
 export interface INotes{
-    _id : string,
+    _id? : string,
     attachment : string,
     course : string,
     

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
 import Notes from "@/database/models/notes.schema";
+import mongoose from "mongoose";
 
 export async function createNotes(request: Request) {
     try {
@@ -17,7 +18,7 @@ export async function createNotes(request: Request) {
   
       const formData = await request.formData();
       const file = formData.get("attachment") as File | null;
-      const course = formData.get("course") as string;
+      const course = formData.get("course") ;
 
       let attachmentPath = "";
       if (file) {
@@ -71,27 +72,38 @@ export async function createNotes(request: Request) {
     }
   }
   
+
   export async function deleteNote(id: string, request: Request) {
-    try {
-      await dbConnect();
-      const authResponse =  await authMiddleware(request as NextRequest)
-        if(!authResponse){
-          return Response.json({
-              message : "You are not authorized to perform this action 😒"
-          },{status:401})
-      }
-      const deleted = await Notes.findByIdAndDelete(id);
+      try {
+          console.log("Deleting note with ID:", id);
   
-      if (!deleted) {
-        return NextResponse.json({ message: "Note not found or already deleted 😴" }, { status: 404 });
-      }
+          await dbConnect();
   
-      return NextResponse.json({ message: "Note deleted successfully 😍" }, { status: 200 });
-    } catch (error) {
-      return NextResponse.json(
-        { message: "Error deleting course 🙃", error: (error as Error).message },
-        { status: 500 }
-      );
-    }
+          const authResponse = await authMiddleware(request as NextRequest);
+          if (!authResponse) {
+              return NextResponse.json(
+                  { message: "You are not authorized to perform this action 😒" },
+                  { status: 401 }
+              );
+          }
+  
+          if (!mongoose.Types.ObjectId.isValid(id)) {
+              return NextResponse.json({ message: "Invalid note ID provided 🤨" }, { status: 400 });
+          }
+  
+          const note = await Notes.findById(id);
+          if (!note) {
+              return NextResponse.json({ message: "Note not found 🤔" }, { status: 404 });
+          }
+  
+          await Notes.findByIdAndDelete(id);
+  
+          return NextResponse.json({ message: "Note deleted successfully 😍" }, { status: 200 });
+      } catch (error) {
+          return NextResponse.json(
+              { message: "Error deleting note 🙃", error: (error as Error).message },
+              { status: 500 }
+          );
+      }
   }
   
