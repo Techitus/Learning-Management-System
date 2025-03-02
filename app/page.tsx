@@ -1,8 +1,10 @@
 import Navbar from "@/components/navbar"
 import Hero from "@/components/hero"
 import Features from "@/components/features"
-import CTA from "@/components/cta"
 import Footer from "@/components/footer"
+import About from "@/components/about"
+import Courses from "@/components/courses"
+import { TeamSection } from "@/components/team-section"
 
 export default function Home() {
   return (
@@ -16,8 +18,10 @@ export default function Home() {
       <div className="relative z-10">
         <Navbar />
         <Hero />
+        <About/>
         <Features />
-        <CTA />
+        <Courses/>
+        <TeamSection />
         <Footer />
       </div>
     </div>

@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { Menu, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Role } from "@/database/models/user.schema";
+import { Input } from "./ui/input";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,8 +122,10 @@ export default function Navbar() {
             {isOpen ? <X className="h-10 w-10" /> : <Menu className="h-10 w-10" />}
           </Button>
           <Link href="/" className="flex items-center">
-            <span className="font-bold text-xl">Learnify</span>
-          </Link>
+          <Input
+                placeholder="Search..."
+                className="pl-7 pr-4 ml-8 py-2 w-3/4 bg-white/10 hover:bg-white/20 focus:bg-white/20 transition-colors border-transparent focus:border-primary"
+              />          </Link>
           {mounted && session ? (
             <UserMenu />
           ) : (
@@ -138,17 +141,27 @@ export default function Navbar() {
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <span className="font-bold text-2xl">Learnify</span>
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link href="/solutions" className="transition-colors hover:text-primary">
+          <div className="flex items-center justify-center flex-1">
+          <form className="w-full max-w-lg space-x-10">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search courses, students, or teachers..."
+                className="pl-9 pr-4 py-2 w-full bg-white/10 hover:bg-white/20 focus:bg-white/20 transition-colors border-transparent focus:border-primary"
+              />
+            </div>
+          </form>
+          <nav className="flex  space-x-6 text-sm font-medium ml-20">
+            <Link href="/allcourses" className="transition-colors hover:text-primary">
               All Courses
             </Link>
             <Link href="/industries" className="transition-colors hover:text-primary">
               My Courses
             </Link>
-            <Link href="/about" className="transition-colors hover:text-primary">
-              About Us
-            </Link>
+           
           </nav>
+        </div>
+         
           <div className="flex items-center space-x-4">
             
             {mounted && session ? (
@@ -179,7 +192,9 @@ export default function Navbar() {
                 <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Close menu">
                   <X className="h-10 w-10 " />
                 </Button>
+              
               </div>
+              
               <nav className="flex flex-col p-4 space-y-4">
                 <Link
                   href="/solutions"
@@ -195,14 +210,7 @@ export default function Navbar() {
                 >
                   My Courses
                 </Link>
-                <Link
-                  href="/about"
-                  className="transition-colors hover:text-primary"
-                  onClick={() => handleLinkClick("/about")}
-                >
-                  About Us
-                </Link>
-               
+                
                 {mounted && session && (
                   <Button onClick={handleLogout} variant="ghost" className="justify-start px-0">
                     Log out
