@@ -1,3 +1,4 @@
+import { EnrollmentStatus } from "@/database/models/enrolement.schema";
 import { Status } from "@/types/status.types";
 interface IStudent {
     username : string,
@@ -18,6 +19,7 @@ export interface IEnrollment {
     course : ICourse,
     whatsapp : string,
     paymentVerification : string,
+    enrollmentStatus : EnrollmentStatus,
     enrollAt : Date,
 }
 

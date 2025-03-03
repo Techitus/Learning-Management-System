@@ -43,5 +43,5 @@ const enrollmentSchema = new Schema<IEnrollment>({
          
 })
 
-const Enrollment =mongoose.models.Enrollement || mongoose.model('Enrollment', enrollmentSchema)
+const Enrollment = mongoose.model('Enrollment', enrollmentSchema)
 export default Enrollment
