@@ -50,6 +50,6 @@ const courseSchema = new Schema<ICourse>({
 
 })
 
-const Courses = mongoose.models.courses || mongoose.model("courses", courseSchema);
+const Courses = mongoose.models.Courses|| mongoose.model("Courses", courseSchema);
 
 export default Courses
