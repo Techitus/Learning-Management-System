@@ -39,10 +39,11 @@ import {
   Clock 
 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
-import { fetchEnrollments } from "@/store/enrollements/enrollementSlice"
+import {  changeEnrollmentStatus, fetchEnrollments } from "@/store/enrollements/enrollementSlice"
 import { EnrollmentStatus } from "@/database/models/enrolement.schema"
+import { StatusSelection } from "./ui/status-selection"
+import toast, { Toaster } from "react-hot-toast"
 
-// Mock data for demonstration
 
 
 
@@ -52,26 +53,13 @@ export function EnrollmentTable() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPaymentPreviewOpen, setIsPaymentPreviewOpen] = useState(false)
 
-  const {enrollments}= useAppSelector((state)=>state.enrollments)
-
+  const { enrollments } = useAppSelector((state) => state.enrollments) 
   const dispatch = useAppDispatch()
   
     useEffect(() => {
       dispatch(fetchEnrollments())
     }, [dispatch])
   
-  // const handleStatusChange = (enrollmentId: string, newStatus: EnrollmentStatus) => {
-  //   setEnrollments(
-  //     enrollments.map((enrollment) =>
-  //       enrollment.id === enrollmentId ? { ...enrollment, status: newStatus } : enrollment
-  //     )
-  //   )
-  // }
-
-  // const handleDeleteEnrollment = (enrollmentId: string) => {
-  //   setEnrollments(enrollments.filter((enrollment) => enrollment.id !== enrollmentId))
-  //   setIsDeleteDialogOpen(false)
-  // }
 
   const openPreview = (enrollment: typeof enrollments[0]) => {
     setSelectedEnrollment(enrollment)
@@ -87,7 +75,6 @@ export function EnrollmentTable() {
     setSelectedEnrollment(enrollment)
     setIsDeleteDialogOpen(true)
   }
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case EnrollmentStatus.APPROVE:
@@ -100,6 +87,17 @@ export function EnrollmentTable() {
         return <Badge variant="outline">{status}</Badge>
     }
   }
+  const handleChangeStatus = (status: EnrollmentStatus, id: string) => {
+    dispatch(changeEnrollmentStatus(status, id));  
+    setIsPaymentPreviewOpen(false)
+    toast.success("Status changed successfully!", {
+        style: {
+            borderRadius: "10px",
+            background: "#000",
+            color: "#fff",
+        },
+    });
+};
 
   return (
     <>
@@ -117,12 +115,14 @@ export function EnrollmentTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {enrollments.map((enrollment) => (
+            {enrollments?.map((enrollment) =>enrollment?.student && (
               <TableRow key={enrollment._id}>
                 <TableCell>
                   <Avatar>
-                    <AvatarImage src={enrollment.student.profileImage} alt={enrollment.student.username} />
-                    <AvatarFallback>{enrollment.student.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage 
+  src={enrollment?.student?.profileImage || "/default-avatar.png"} 
+  alt={enrollment?.student?.username || "Unknown"} 
+/>                    <AvatarFallback>{enrollment.student.username.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </TableCell>
                 <TableCell className="font-medium">
@@ -185,7 +185,7 @@ export function EnrollmentTable() {
             <div className="flex flex-col gap-4 py-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={selectedEnrollment.student.profileImage} alt={selectedEnrollment.student.username} />
+                  <AvatarImage src={selectedEnrollment?.student.profileImage} alt={selectedEnrollment.student.username} />
                   <AvatarFallback className="text-xl">
                     {selectedEnrollment.student.username.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -224,74 +224,82 @@ export function EnrollmentTable() {
 
       {/* Payment Screenshot Preview */}
       <Dialog open={isPaymentPreviewOpen} onOpenChange={setIsPaymentPreviewOpen}>
-        {selectedEnrollment && (
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Payment Verification</DialogTitle>
-              <DialogDescription>
-                Payment screenshot for {selectedEnrollment.course.courseName}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-4 py-4">
-              <div className="rounded-md overflow-hidden border">
-                <img 
-                  src={selectedEnrollment.paymentVerification} 
-                  alt="Payment Screenshot" 
-                  className="w-full h-auto object-cover"
+      {selectedEnrollment && (
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Payment Verification</DialogTitle>
+            <DialogDescription>
+              Payment screenshot for {selectedEnrollment.course.courseName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-4 py-4">
+            {/* Image inside mockup */}
+            <div className="relative w-72 h-[500px] rounded-[45px] shadow-[0_0_2px_2px_rgba(255,255,255,0.1)] border-8 border-zinc-900 ml-1">
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-[90px] h-[22px] bg-zinc-900 rounded-full z-20" />
+              <div className="absolute -inset-[1px] border-[3px] border-zinc-700 border-opacity-40 rounded-[37px] pointer-events-none" />
+              <div className="relative w-full h-full rounded-[37px] overflow-hidden flex items-center justify-center bg-zinc-900/10">
+                <img
+                  src={selectedEnrollment.paymentVerification}
+                  alt="Payment Screenshot"
+                  className="w-full h-full object-cover"
                 />
               </div>
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-1">
-                  <p className="text-sm font-medium">Student:</p>
-                  <p className="text-sm">{selectedEnrollment.student.username}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-1">
-                  <p className="text-sm font-medium">Course:</p>
-                  <p className="text-sm">{selectedEnrollment.course.courseName}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-1">
-                  <p className="text-sm font-medium">Whatsapp:</p>
-                  <p className="text-sm">{selectedEnrollment.whatsapp}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-1">
-                  <p className="text-sm font-medium">Amount:</p>
-                  <p className="text-sm">Rs.{selectedEnrollment.course.coursePrice}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-1">
-                  <p className="text-sm font-medium">Status:</p>
-                  <div>{getStatusBadge(selectedEnrollment.enrollmentStatus)}</div>
-                </div>
-              </div>
+              <div className="absolute left-[-12px] top-20 w-[6px] h-8 bg-zinc-900 rounded-l-md shadow-md" />
+              <div className="absolute left-[-12px] top-32 w-[6px] h-10 bg-zinc-900 rounded-l-md shadow-md" />
+              <div className="absolute left-[-12px] top-44 w-[6px] h-10 bg-zinc-900 rounded-l-md shadow-md" />
+              <div className="absolute right-[-12px] top-32 w-[6px] h-14 bg-zinc-900 rounded-r-md shadow-md" />
             </div>
-            <DialogFooter className="flex justify-between sm:justify-between">
-              <div className="flex gap-2">
-                <Button 
-                  variant="secondary" 
-                  // onClick={() => {
-                  //   handleStatusChange(selectedEnrollment.id, "verified");
-                  //   setIsPaymentPreviewOpen(false);
-                  // }}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Verify Payment
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  // onClick={() => {
-                  //   handleStatusChange(selectedEnrollment.id, "cancelled");
-                  //   setIsPaymentPreviewOpen(false);
-                  // }}
-                >
-                  Reject
-                </Button>
-              </div>
-              <Button variant="outline" onClick={() => setIsPaymentPreviewOpen(false)}>
-                Close
+            
+            {/* Details on the right */}
+            <div className=" p-6 rounded-lg shadow-lg">
+  <h2 className=" font-bold text-center text-white/90 mb-4">Personal Information</h2>
+  <div className="w-full space-y-4">
+    <div className="grid grid-cols-2 gap-4">
+      <p className="text-sm font-medium text-white">Student:</p>
+      <p className="text-sm text-white">{selectedEnrollment.student.username}</p>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <p className="text-sm font-medium text-white">Course:</p>
+      <p className="text-sm text-white">{selectedEnrollment.course.courseName}</p>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <p className="text-sm font-medium text-white">Whatsapp:</p>
+      <p className="text-sm text-white">{selectedEnrollment.whatsapp}</p>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <p className="text-sm font-medium text-white">Amount:</p>
+      <p className="text-sm text-white">Rs.{selectedEnrollment.course.coursePrice}</p>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <p className="text-sm font-medium text-white">Status:</p>
+      <div>{getStatusBadge(selectedEnrollment.enrollmentStatus)}</div>
+      
+    </div>
+    
+    <StatusSelection handleClick={(status: EnrollmentStatus) => handleChangeStatus(status, selectedEnrollment?._id || "")} 
+ />
+
+  </div>
+
+</div>
+
+          </div>
+          
+          <DialogFooter className="flex justify-between sm:justify-between">
+            <div className="flex gap-2">
+              {/* <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white">
+                Verify Payment
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        )}
-      </Dialog>
+              <Button variant="destructive">Reject</Button> */}
+            </div>
+            <Button variant="outline" onClick={() => setIsPaymentPreviewOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      )}
+    </Dialog>
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -321,6 +329,7 @@ export function EnrollmentTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Toaster position="bottom-right" reverseOrder={false} />
     </>
   )
 }

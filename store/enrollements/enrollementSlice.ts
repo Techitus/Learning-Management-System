@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { IEnrollmentState } from "./types";
+import { createSlice,  } from "@reduxjs/toolkit";
+import {  IEnrollmentState } from "./types";
 import { Status } from "@/types/status.types";
 import { AppDispatch } from "../store";
 import API from "@/http";
@@ -114,6 +114,8 @@ export function changeEnrollmentStatus(status:EnrollmentStatus,id:string){
             const response = await API.patch(`/enrollment/${id}`,{status : status})
             if(response.status == 200){
                 dispatch(setStatus(Status.SUCCESS))
+                dispatch(fetchEnrollments())
+            //    dispatch( addEnrollment(response.data.data))
             }else{
                 dispatch(setStatus(Status.ERROR))
             }
