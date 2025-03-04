@@ -10,6 +10,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { X, FileIcon, Loader2 } from "lucide-react"
+import qr from "@/Images/myqr.jpeg"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 import { Clock, Tag, User, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -18,6 +31,10 @@ import { fetchCourses } from "@/store/courses/courseSlice";
 import { fetchCategories } from "@/store/category/categorySlice";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { createEnrollment } from "@/store/enrollements/enrollementSlice";
+import { useSession } from "next-auth/react";
+import toast, { Toaster } from "react-hot-toast";
+import { Status } from "@/types/status.types";
 
 type Mentor = {
   _id: string;
@@ -50,12 +67,80 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceSort, setPriceSort] = useState<"asc" | "desc" | "none">("none");
   const dispatch = useAppDispatch();
+  const [open, setOpen] = useState(false)
+  const { data: session } = useSession();
+  const [whatsappNumber, setWhatsappNumber] = useState("")
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    setPaymentScreenshot(file)
+
+    if (file) {
+      const fileUrl = URL.createObjectURL(file)
+      setPreviewUrl(fileUrl)
+    } else {
+      setPreviewUrl(null)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!paymentScreenshot || !whatsappNumber) {
+      console.error("Please provide both WhatsApp number and payment screenshot")
+      return
+    }
+      const student = session?.user?.id;
+    const course = courses.length > 0 ? courses[0]._id : null;
+    
+    const formData = new FormData()
+    formData.append('whatsapp', whatsappNumber)
+    formData.append('paymentVerification', paymentScreenshot)
+    formData.append('student', student as string)
+    formData.append('course', course as string)
+    try {
+      setIsSubmitting(true)
+
+      await dispatch(createEnrollment(formData))
+
+      setWhatsappNumber("")
+      setPaymentScreenshot(null)
+      setPreviewUrl(null)
+      setOpen(false)
+      toast.success("Course Enrollment Successfully!!!", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
+    } catch (error) {
+      toast.error("Unable to Enroll...", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const clearFile = () => {
+    setPaymentScreenshot(null)
+    setPreviewUrl(null)
+    if (document.getElementById("payment-screenshot") instanceof HTMLInputElement) {
+      ;(document.getElementById("payment-screenshot") as HTMLInputElement).value = ""
+    }
+  }
+  const { status } = useAppSelector((state) => state.enrollments);
 
   const { courses } = useAppSelector((state) => state.courses);
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
-
   const { categories } = useAppSelector((state) => state.categories);
   useEffect(() => {
     dispatch(fetchCategories());
@@ -154,10 +239,120 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
               <CardFooter className="flex justify-between items-center">
                 <p className="text-lg font-bold">Rs.{course.coursePrice}</p>
                 {showBuyButton && (
-                  <Button variant="default" className="flex items-center gap-2">
-                    <ShoppingCart className="w-4 h-4" /> Buy Now
+              <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4" />
+                  Enroll Now</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Payment Details</DialogTitle>
+                  <DialogDescription>Scan the QR code to make payment and upload the screenshot</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="border border-border p-3 rounded-lg mb-2">
+                      <Image
+                        src={qr || "/placeholder.svg"}
+                        alt="Payment QR Code"
+                        width={200}
+                        height={200}
+                        className="mx-auto"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">Scan this QR code with your payment app</p>
+                  </div>
+        
+                  <Separator className="my-2" />
+        
+                  <div className="flex flex-row gap-4">
+                    <div className="flex-1 space-y-1">
+                      <Label htmlFor="whatsapp" className="text-sm">
+                        WhatsApp Number
+                      </Label>
+                      <Input
+                        id="whatsapp"
+                        type="text"
+                        placeholder="Enter WhatsApp number"
+                        value={whatsappNumber}
+                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                        required
+                        disabled={isSubmitting}
+                      />
+                    </div>
+        
+                    <div className="flex-1 space-y-1">
+                      <Label htmlFor="payment-screenshot" className="text-sm">
+                        Payment Screenshot
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="payment-screenshot"
+                          type="file"
+                          className="hidden"
+                          accept="image/png, image/jpeg, image/jpg"
+                          onChange={handleFileChange}
+                          
+                          disabled={isSubmitting}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full h-10 flex items-center justify-center gap-2"
+                          onClick={() => document.getElementById("payment-screenshot")?.click()}
+                          disabled={isSubmitting}
+                        >
+                          <FileIcon className="h-4 w-4" />
+                          {paymentScreenshot ? "File Selected" : "Select File"}
+                        </Button>
+                        {paymentScreenshot && (
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={clearFile}
+                            disabled={isSubmitting}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+        
+                  {previewUrl && (
+                    <div className="mt-2">
+                      <Image
+                        src={previewUrl || "/placeholder.svg"}
+                        alt="Payment Screenshot Preview"
+                        width={300}
+                        height={100}
+                        className="mx-auto max-h-[100px] w-auto object-contain border rounded-md"
+                      />
+                    </div>
+                  )}
+        
+                  <div className="flex justify-end mt-2">
+                  <Button  type="submit" 
+                      disabled={isSubmitting}
+                      >{isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit"
+                      )}
                   </Button>
-                )}
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+           )
+         }
+                
               </CardFooter>
             </Card>
           ))
@@ -167,6 +362,8 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
           </div>
         )}
       </div>
+      <Toaster position="bottom-right" reverseOrder={false} />
+
     </div>
   );
 }

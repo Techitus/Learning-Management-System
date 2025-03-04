@@ -39,10 +39,11 @@ import {
   Clock 
 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
-import {  changeEnrollmentStatus, fetchEnrollments } from "@/store/enrollements/enrollementSlice"
+import {  changeEnrollmentStatus, deleteEnrollment, fetchEnrollments } from "@/store/enrollements/enrollementSlice"
 import { EnrollmentStatus } from "@/database/models/enrolement.schema"
 import { StatusSelection } from "./ui/status-selection"
 import toast, { Toaster } from "react-hot-toast"
+import { Status } from "@/types/status.types"
 
 
 
@@ -52,8 +53,9 @@ export function EnrollmentTable() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPaymentPreviewOpen, setIsPaymentPreviewOpen] = useState(false)
+  const [actionType, setActionType] = useState<"deleted" | "changed" | null>(null);
 
-  const { enrollments } = useAppSelector((state) => state.enrollments) 
+  const { enrollments,status } = useAppSelector((state) => state.enrollments) 
   const dispatch = useAppDispatch()
   
     useEffect(() => {
@@ -88,16 +90,33 @@ export function EnrollmentTable() {
     }
   }
   const handleChangeStatus = (status: EnrollmentStatus, id: string) => {
-    dispatch(changeEnrollmentStatus(status, id));  
-    setIsPaymentPreviewOpen(false)
-    toast.success("Status changed successfully!", {
-        style: {
-            borderRadius: "10px",
-            background: "#000",
-            color: "#fff",
-        },
-    });
+    dispatch(changeEnrollmentStatus(status, id));
+    setIsPaymentPreviewOpen(false);
+    setActionType("changed"); 
 };
+const handleDelete = (id: string) => {
+  dispatch(deleteEnrollment(id));
+  setIsDeleteDialogOpen(false);
+  setActionType("deleted"); 
+};
+useEffect(() => {
+  if (status === Status.SUCCESS && actionType) {
+      toast.success(
+          actionType === "deleted"
+              ? "Enrollment deleted successfully!"
+              : "Status changed successfully!",
+          {
+              style: {
+                  borderRadius: "10px",
+                  background: "#000",
+                  color: "#fff",
+              },
+          }
+      );
+      setActionType(null); 
+  }
+}, [status, actionType]);
+
 
   return (
     <>
@@ -172,7 +191,6 @@ export function EnrollmentTable() {
         </Table>
       </div>
 
-      {/* Enrollment Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         {selectedEnrollment && (
           <DialogContent className="sm:max-w-md">
@@ -222,7 +240,6 @@ export function EnrollmentTable() {
         )}
       </Dialog>
 
-      {/* Payment Screenshot Preview */}
       <Dialog open={isPaymentPreviewOpen} onOpenChange={setIsPaymentPreviewOpen}>
       {selectedEnrollment && (
         <DialogContent className="sm:max-w-2xl">
@@ -233,7 +250,6 @@ export function EnrollmentTable() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-4 py-4">
-            {/* Image inside mockup */}
             <div className="relative w-72 h-[500px] rounded-[45px] shadow-[0_0_2px_2px_rgba(255,255,255,0.1)] border-8 border-zinc-900 ml-1">
               <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-[90px] h-[22px] bg-zinc-900 rounded-full z-20" />
               <div className="absolute -inset-[1px] border-[3px] border-zinc-700 border-opacity-40 rounded-[37px] pointer-events-none" />
@@ -250,7 +266,6 @@ export function EnrollmentTable() {
               <div className="absolute right-[-12px] top-32 w-[6px] h-14 bg-zinc-900 rounded-r-md shadow-md" />
             </div>
             
-            {/* Details on the right */}
             <div className=" p-6 rounded-lg shadow-lg">
   <h2 className=" font-bold text-center text-white/90 mb-4">Personal Information</h2>
   <div className="w-full space-y-4">
@@ -287,10 +302,7 @@ export function EnrollmentTable() {
           
           <DialogFooter className="flex justify-between sm:justify-between">
             <div className="flex gap-2">
-              {/* <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white">
-                Verify Payment
-              </Button>
-              <Button variant="destructive">Reject</Button> */}
+              
             </div>
             <Button variant="outline" onClick={() => setIsPaymentPreviewOpen(false)}>
               Close
@@ -321,8 +333,9 @@ export function EnrollmentTable() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+            key={selectedEnrollment?._id}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              // onClick={() => selectedEnrollment && handleDeleteEnrollment(selectedEnrollment.id)}
+              onClick={() => handleDelete(selectedEnrollment?._id ?? '')}
             >
               Delete
             </AlertDialogAction>
