@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import dbConnect from "@/database/connection";
-import Enrollment from "@/database/models/enrolement.schema";
+import Enrollment, { EnrollmentStatus } from "@/database/models/enrolement.schema";
 import { authMiddleware } from "@/middleware/auth.middleware";
 import { NextRequest, NextResponse } from "next/server";
 import Courses from "@/database/models/course.schema";
@@ -11,15 +11,15 @@ import path from "path";
 export async function createEnrollment(request: Request) {
     try {
       await dbConnect();
-      
-    
-  
       const formData = await request.formData();
       const whatsapp = parseFloat(formData.get("whatsapp") as string);
       const student = new mongoose.Types.ObjectId(formData.get("student") as string);
       const course = new mongoose.Types.ObjectId(formData.get("course") as string);
       const file = formData.get("paymentVerification") as File | null;
-      
+      let enrollmentStatus = formData.get("enrollmentStatus") as string;  
+      if (!enrollmentStatus) {
+        enrollmentStatus = EnrollmentStatus.PENDING;
+      }
       let paymentVerificationPath = "";
       if (file) {
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
@@ -35,6 +35,7 @@ export async function createEnrollment(request: Request) {
         student,
         course,
         whatsapp,
+        enrollmentStatus,
         paymentVerification: paymentVerificationPath,
       });
   

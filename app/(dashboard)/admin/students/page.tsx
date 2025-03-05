@@ -17,7 +17,7 @@ export default function Students() {
     const filteredStudent = users.filter((user) => user.role === Role.Student);
   return (
     <div className="container mx-auto p-4">
-      <UserCard users={filteredStudent} />
+      <UserCard users={filteredStudent} showAdminEnroll={true} />
     </div>
   )
 }

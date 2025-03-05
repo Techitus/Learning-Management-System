@@ -34,6 +34,10 @@ import { fetchCategories } from "@/store/category/categorySlice"
 import { deleteUserById, promoteToTeacher } from "@/store/users/userSlice"
 import { Role } from "@/database/models/user.schema"
 import toast, { Toaster } from "react-hot-toast"
+import { createEnrollment } from "@/store/enrollements/enrollementSlice"
+import { ICourses } from "@/store/courses/types"
+import { fetchCourses } from "@/store/courses/courseSlice"
+import { EnrollmentStatus } from "@/database/models/enrolement.schema"
 
 interface ICategory {
   _id: string;
@@ -53,31 +57,41 @@ interface IUser {
 
 interface UserCardProps {
   users: IUser[];
+  showAdminEnroll?: boolean;
 }
 
-export default function UserCard({ users }: UserCardProps) {
+export default function UserCard({ users, showAdminEnroll=false }: UserCardProps) {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector((state) => state.categories);
-  
- 
+  const {courses} = useAppSelector((state) => state.courses);
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
   const [dateSort, setDateSort] = useState<"latest" | "oldest" | "none">("none");
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [promoteConfirmation, setPromoteConfirmation] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [confirmationInput, setConfirmationInput] = useState("");
+  
+  // Enrollment state
+  const [enrollmentDialog, setEnrollmentDialog] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
+  const [enrollmentData, setEnrollmentData] = useState({
+    whatsappNumber: "",
+    course: "",
+    paymentStatus: ""
+  });
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchCourses());
+  }, [dispatch]);
 
   useEffect(() => {
-   
     setFilteredUsers(Array.isArray(users) ? users : []);
   }, [users]);
 
   const targetUser = Array.isArray(users) ? users.find(u => 
-    u._id === (deleteConfirmation.userId || promoteConfirmation.userId)
+    u._id === (deleteConfirmation.userId || promoteConfirmation.userId || enrollmentDialog.userId)
   ) : null;
 
   const applyFilters = () => {
@@ -140,6 +154,36 @@ export default function UserCard({ users }: UserCardProps) {
     }
   };
 
+  const handleEnrollmentSubmit = async () => {
+    if (!enrollmentDialog.userId || !enrollmentData.whatsappNumber || !enrollmentData.course || !enrollmentData.paymentStatus) {
+      toast.error("Please fill all fields before submitting!");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("student", enrollmentDialog.userId);
+    formData.append("whatsapp", enrollmentData.whatsappNumber);
+    formData.append("course", enrollmentData.course);
+    formData.append("enrollmentStatus", enrollmentData.paymentStatus);
+
+    try {
+      await dispatch(createEnrollment(formData));
+      toast.success("Enrollment submitted successfully!", {
+        style: {
+          borderRadius: "10px",
+          background: "#000",
+          color: "#fff",
+        },
+      });
+  
+      setEnrollmentDialog({ isOpen: false, userId: null });
+      setEnrollmentData({ whatsappNumber: "", course: "", paymentStatus: "" });
+  
+    } catch (error) {
+      console.error("Enrollment submission failed:", error);
+      toast.error("Failed to enroll student. Please try again.");
+    }
+  };
   if (!Array.isArray(users) || users.length === 0) {
     return (
       <div className="text-center py-8">
@@ -195,6 +239,13 @@ export default function UserCard({ users }: UserCardProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {showAdminEnroll && (
+                  <DropdownMenuItem 
+                    onSelect={() => setEnrollmentDialog({ isOpen: true, userId: user._id })}
+                  >
+                    Enroll Student
+                  </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem 
                     onSelect={() => setDeleteConfirmation({ isOpen: true, userId: user._id })}
                   >
@@ -222,39 +273,36 @@ export default function UserCard({ users }: UserCardProps) {
                 <div>
                   <h2 className="text-xl font-semibold">{user.username}</h2>
                   <div className="flex justify-around space-x-10">
-  <div className="flex items-center text-sm text-gray-400">
-    <CalendarIcon className="w-4 h-4 mr-1" />
-    <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
-  </div>
-  
-</div>
-
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CalendarIcon className="w-4 h-4 mr-1" />
+                      <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="mt-4 space-y-2">
-              <div className="flex items-center text-sm text-gray-400 ">
-    <User className="w-4 h-4 mr-1" />
-    <span>{user.role === Role.Teacher
-        ? "Teacher"
-        : user.role === Role.Admin
-        ? "Admin"
-        : "Student"}</span>
-  </div>
+                <div className="flex items-center text-sm text-gray-400">
+                  <User className="w-4 h-4 mr-1" />
+                  <span>
+                    {user.role === Role.Teacher
+                      ? "Teacher"
+                      : user.role === Role.Admin
+                      ? "Admin"
+                      : "Student"}
+                  </span>
+                </div>
                 <div className="flex items-center text-sm">
                   <MailIcon className="w-4 h-4 mr-2 text-gray-400" />
                   <span>{user.email}</span>
                 </div>
-                
-                  <div className="flex items-center text-sm">
-                    <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
-                    {user.mobile ? (
+                <div className="flex items-center text-sm">
+                  <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
+                  {user.mobile ? (
                     <span>{user.mobile}</span>
-                  ):
-                  <span>Not available</span>
-                }
-                  </div>
-                
-
+                  ) : (
+                    <span>Not available</span>
+                  )}
+                </div>
               </div>
               <div className="mt-4">
                 <h3 className="text-sm font-semibold mb-2">Courses:</h3>
@@ -276,7 +324,6 @@ export default function UserCard({ users }: UserCardProps) {
                   })}
                 </div>
               </div>
-             
             </div>
           </div>
         ))}
@@ -358,6 +405,77 @@ export default function UserCard({ users }: UserCardProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={enrollmentDialog.isOpen}
+        onOpenChange={(isOpen) => {
+          setEnrollmentDialog({ isOpen, userId: isOpen ? enrollmentDialog.userId : null });
+          if (!isOpen) {
+            setEnrollmentData({ whatsappNumber: "", course: "", paymentStatus: "" });
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enroll Student</DialogTitle>
+            <DialogDescription>
+              Enroll {targetUser?.username} in a course
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="whatsapp">WhatsApp Number</Label>
+              <Input
+                id="whatsapp"
+                type="tel"
+                value={enrollmentData.whatsappNumber}
+                onChange={(e) => setEnrollmentData({ ...enrollmentData, whatsappNumber: e.target.value })}
+                placeholder="Enter WhatsApp number"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="course">Course</Label>
+              <Select
+                value={enrollmentData.course}
+                onValueChange={(value) => setEnrollmentData({ ...enrollmentData, course: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map((course: ICourses) => (
+                    <SelectItem key={course._id} value={course._id}>
+                      {course.courseName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="payment-status">Payment Status</Label>
+              <Select
+  value={enrollmentData.paymentStatus}
+  onValueChange={(value) => {
+    setEnrollmentData({ ...enrollmentData, paymentStatus: value });
+  }}
+>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={EnrollmentStatus.PENDING}>Pending</SelectItem>
+                  <SelectItem value={EnrollmentStatus.APPROVE}>Approved</SelectItem>
+                  <SelectItem value={EnrollmentStatus.REJECTED}>Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleEnrollmentSubmit}>Enroll Student</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Toaster position="bottom-right" reverseOrder={false} />
     </div>
   );

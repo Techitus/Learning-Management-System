@@ -7,6 +7,7 @@ const page = () => {
     <div>
       <Navbar/>
         <CourseList showBuyButton={true}  disableNavigation={true}/>
+        
     </div>
   )
 }
