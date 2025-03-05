@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import React from 'react'
 import about from '@/Images/about.webp'
+import Link from 'next/link'
 const About = () => {
   return (
     <section className="py-16 ">
@@ -31,9 +32,11 @@ const About = () => {
 
               </p>
               <div className="pt-4">
+                <Link href="/allcourses">
                 <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-md font-medium">
-                  Learn More
+                  Engage with Us
                 </button>
+                </Link>
               </div>
             </div>
           </div>

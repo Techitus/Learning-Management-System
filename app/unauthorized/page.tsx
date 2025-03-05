@@ -6,13 +6,17 @@ import Link from 'next/link';
 
 export default function AccessDenied() {
   return (
-    <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+    <div className='flex items-center justify-center h-screen'>
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+        <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-green-500/10 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-green-300/10 blur-[100px]" />
+    <div className="absolute  flex items-center justify-center">
+      <div className="max-w-md w-full  rounded-2xl shadow-xl  text-center">
         <div className="mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
             <ShieldX className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Access Denied</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Access Denied</h1>
           <p className="text-gray-600">
             Sorry, but you don't have permission to access this page. Please contact your administrator if you believe this is a mistake.
           </p>
@@ -41,6 +45,7 @@ export default function AccessDenied() {
           </p>
         </div>
       </div>
+    </div>
     </div>
   );
 }
