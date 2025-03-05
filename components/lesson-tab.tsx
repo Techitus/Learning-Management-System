@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useParams } from "next/navigation";
 import { fetchLessons } from "@/store/Lessons/lessonSlice";
 
-export default function LessonsTab() {
+export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEnable?: boolean }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const dispatch = useAppDispatch();
   const data = useParams()
@@ -32,9 +32,13 @@ export default function LessonsTab() {
           <Card key={lesson._id} className="overflow-hidden">
             <CardHeader className="relative pb-0">
               <div className="absolute top-2 right-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                {
+                  isLessonTabEnable && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
                   <Trash2 className="h-5 w-5 -mt-3" />
                 </Button>
+                  )
+                }
               </div>
               <div className="bg-muted aspect-video rounded-md flex items-center justify-center">
                 <Video className="h-12 w-12 text-muted-foreground" />
@@ -49,7 +53,8 @@ export default function LessonsTab() {
             </CardFooter>
           </Card>
         ))}
-        
+        {
+          isLessonTabEnable && (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Card className="overflow-hidden border-dashed cursor-pointer hover:bg-muted/50 transition-colors flex flex-col items-center justify-center h-full min-h-[300px]">
@@ -93,6 +98,8 @@ export default function LessonsTab() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )
+        }
       </div>
     </div>
   );

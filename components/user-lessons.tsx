@@ -5,7 +5,7 @@ import NotesTab from "@/components/notes-tab";
 import LessonsTab from "@/components/lesson-tab";
 
 
-export default function LearningTabs() {
+export default function LessonLists() {
    
   return (
     <Tabs defaultValue="lessons" className="w-full">
@@ -23,11 +23,11 @@ export default function LearningTabs() {
       </div>
       
       <TabsContent value="lessons" className="mt-8">
-        <LessonsTab isLessonTabEnable={true} />
+        <LessonsTab isLessonTabEnable={false} />
       </TabsContent>
       
       <TabsContent value="notes" className="mt-8">
-        <NotesTab  addNoteEnable={true}/>
+        <NotesTab addNoteEnable={false} />
       </TabsContent>
     </Tabs>
   );

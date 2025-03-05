@@ -30,7 +30,7 @@ export interface INotes {
     course: string,
 }
 
-export default function NotesTab() {
+export default function NotesTab({ addNoteEnable = true }: { addNoteEnable?: boolean }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string>("");
@@ -126,14 +126,20 @@ export default function NotesTab() {
           <Card key={note._id} className="flex flex-col h-full overflow-hidden">
             <CardHeader className="relative p-3 pb-0 flex-shrink-0">
               <div className="absolute top-1 right-1 z-10">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDeleteClick(note._id)}
-                >
-                  <Trash2 className="h-4 w-4 -mt-5" />
-                </Button>
+                {
+                  addNoteEnable && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteClick(note._id)}
+                    >
+                      <Trash2 className="h-4 w-4 -mt-5" />
+                    </Button>
+                  )
+                }
+                 
+                
               </div>
               <div className="bg-muted aspect-square rounded-md flex items-center justify-center ">
                 <FileText className="h-10 w-10 text-muted-foreground" />
@@ -157,59 +163,70 @@ export default function NotesTab() {
           </Card>
         ))}
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Card className="flex flex-col h-full overflow-hidden border-dashed cursor-pointer hover:bg-muted/50 transition-colors items-center justify-center">
-              <CardContent className="flex flex-col items-center justify-center h-full p-4">
-                <PlusCircle className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground font-medium text-center">Upload New Notes</p>
-              </CardContent>
-            </Card>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
-            <DialogHeader>
-              <DialogTitle>Upload New Notes</DialogTitle>
-              <DialogDescription>
-                Add new PDF notes to your course. Fill in the details below.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="pdf">PDF Document</Label>
-                  <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center gap-2">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
-                    {selectedFileName ? (
-                      <p className="text-sm font-medium">{selectedFileName}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Drag and drop your PDF file here or click to browse</p>
-                    )}
-                    <Input 
-                      onChange={handleFileChange} 
-                      id="pdf" 
-                      name="attachment" 
-                      type="file" 
-                      accept=".pdf" 
-                      className="hidden" 
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => document.getElementById('pdf')?.click()}
-                    >
-                      Select PDF
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={!selectedFile}>Upload Notes</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {addNoteEnable && (
+  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <DialogTrigger asChild>
+      <Card className="flex flex-col h-full overflow-hidden border-dashed cursor-pointer hover:bg-muted/50 transition-colors items-center justify-center">
+        <CardContent className="flex flex-col items-center justify-center h-full p-4">
+          <PlusCircle className="h-10 w-10 text-muted-foreground mb-2" />
+          <p className="text-sm text-muted-foreground font-medium text-center">
+            Upload New Notes
+          </p>
+        </CardContent>
+      </Card>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[525px]">
+      <DialogHeader>
+        <DialogTitle>Upload New Notes</DialogTitle>
+        <DialogDescription>
+          Add new PDF notes to your course. Fill in the details below.
+        </DialogDescription>
+      </DialogHeader>
+      <form onSubmit={handleSubmit}>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="pdf">PDF Document</Label>
+            <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center gap-2">
+              <FileText className="h-8 w-8 text-muted-foreground" />
+              {selectedFileName ? (
+                <p className="text-sm font-medium">{selectedFileName}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Drag and drop your PDF file here or click to browse
+                </p>
+              )}
+              <Input
+                onChange={handleFileChange}
+                id="pdf"
+                name="attachment"
+                type="file"
+                accept=".pdf"
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById("pdf")?.click()}
+              >
+                Select PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={!selectedFile}>
+            Upload Notes
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
+)}
+
 
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent>
