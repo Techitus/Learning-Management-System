@@ -6,7 +6,7 @@ const page = () => {
   return (
     <div>
       <Navbar/>
-        <CourseList showBuyButton={true}  disableNavigation={true}/>
+        <CourseList showBuyButton={true}  disableNavigation={true} showStudentCourses={false} showTeacherCourses={false}/>
         
     </div>
   )
