@@ -188,25 +188,26 @@ export default function Navbar() {
           >
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between p-4 border-b">
-                <span className="font-bold text-xl">Learnify</span>
-                <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Close menu">
+              <Link href="/" className="mr-6 flex items-center space-x-2">
+            <span className="font-bold text-xl">Learnify</span>
+          </Link>                <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Close menu">
                   <X className="h-10 w-10 " />
                 </Button>
               
               </div>
               
-              <nav className="flex flex-col p-4 space-y-4">
+              <nav className="flex flex-col p-4 space-y-4 bg-black/60">
                 <Link
-                  href="/solutions"
+                  href="/allcourses"
                   className="transition-colors hover:text-primary"
-                  onClick={() => handleLinkClick("/solutions")}
+                  onClick={() => handleLinkClick("/allcourses")}
                 >
                   All Courses
                 </Link>
                 <Link
-                  href="/industries"
+                  href="/mycourses"
                   className="transition-colors hover:text-primary"
-                  onClick={() => handleLinkClick("/industries")}
+                  onClick={() => handleLinkClick("/mycourses")}
                 >
                   My Courses
                 </Link>

@@ -36,6 +36,7 @@ import { useSession } from "next-auth/react";
 import toast, { Toaster } from "react-hot-toast";
 import { Status } from "@/types/status.types";
 import { EnrollmentStatus } from "@/database/models/enrolement.schema";
+import { ClockLoader } from "react-spinners";
 
 type Mentor = {
   _id: string;
@@ -142,10 +143,11 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
 useEffect(() => {
     dispatch(fetchEnrollments());
   }, [dispatch]); 
-   const { courses } = useAppSelector((state) => state.courses);
+   const { courses,status} = useAppSelector((state) => state.courses);
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
+  
   const { categories } = useAppSelector((state) => state.categories);
   useEffect(() => {
     dispatch(fetchCategories());
@@ -180,14 +182,25 @@ const enrolledCourses = courses.filter((course) =>
 const teachersCourse = courses.filter(
   (course) => course.mentor.username === session?.user.name
 )
-
+if (status === Status.LOADING) {
+  return (
+    <div>
+<div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+        <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-green-500/10 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-green-300/10 blur-[100px]" />
+            <div className="h-screen flex items-center justify-center ">
+      <ClockLoader color="#ffffff" />
+    </div>
+    </div>
+  );
+}
 const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? teachersCourse: filteredCourses;
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <div className="flex gap-4">
+        <div className="flex gap-4 ">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px] cursor-pointer">
+            <SelectTrigger className="xl:w-[180px] cursor-pointer">
               <SelectValue className="cursor-pointer" placeholder="Filter by Category" />
             </SelectTrigger>
             <SelectContent>
@@ -201,7 +214,7 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
           </Select>
 
           <Select value={priceSort} onValueChange={(value: "asc" | "desc" | "none") => setPriceSort(value)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="xl:w-[180px]">
               <SelectValue placeholder="Sort by Price" />
             </SelectTrigger>
             <SelectContent>
@@ -283,109 +296,111 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
          
        </DialogTrigger>
         )}
-       <DialogContent className="sm:max-w-2xl">
-         <DialogHeader>
-           <DialogTitle>Payment Details</DialogTitle>
-           <DialogDescription>
-             Scan the QR code to make payment and upload the screenshot
-           </DialogDescription>
-         </DialogHeader>
-         <form onSubmit={handleSubmit} className="space-y-4">
-           <div className="flex flex-col items-center justify-center">
-             <div className="border border-border p-3 rounded-lg mb-2">
-               <Image
-                 src={qr || "/placeholder.svg"}
-                 alt="Payment QR Code"
-                 width={200}
-                 height={200}
-                 className="mx-auto"
-               />
-             </div>
-             <p className="text-xs text-muted-foreground text-center">
-               Scan this QR code with your payment app
-             </p>
-           </div>
-           <Separator className="my-2" />
-           <div className="flex flex-row gap-4">
-             <div className="flex-1 space-y-1">
-               <Label htmlFor="whatsapp" className="text-sm">
-                 WhatsApp Number
-               </Label>
-               <Input
-                 id="whatsapp"
-                 type="text"
-                 placeholder="Enter WhatsApp number"
-                 value={whatsappNumber}
-                 onChange={(e) => setWhatsappNumber(e.target.value)}
-                 required
-                 disabled={isSubmitting}
-               />
-             </div>
-             <div className="flex-1 space-y-1">
-               <Label htmlFor="payment-screenshot" className="text-sm">
-                 Payment Screenshot
-               </Label>
-               <div className="flex items-center gap-2">
-                 <Input
-                   id="payment-screenshot"
-                   type="file"
-                   className="hidden"
-                   accept="image/png, image/jpeg, image/jpg"
-                   onChange={handleFileChange}
-                   disabled={isSubmitting}
-                 />
-                 <Button
-                   type="button"
-                   variant="outline"
-                   size="sm"
-                   className="w-full h-10 flex items-center justify-center gap-2"
-                   onClick={() =>
-                     document.getElementById("payment-screenshot")?.click()
-                   }
-                   disabled={isSubmitting}
-                 >
-                   <FileIcon className="h-4 w-4" />
-                   {paymentScreenshot ? "File Selected" : "Select File"}
-                 </Button>
-                 {paymentScreenshot && (
-                   <Button
-                     type="button"
-                     variant="ghost"
-                     size="icon"
-                     onClick={clearFile}
-                     disabled={isSubmitting}
-                   >
-                     <X className="h-4 w-4" />
-                   </Button>
-                 )}
-               </div>
-             </div>
-           </div>
-           {previewUrl && (
-             <div className="mt-2">
-               <Image
-                 src={previewUrl || "/placeholder.svg"}
-                 alt="Payment Screenshot Preview"
-                 width={300}
-                 height={100}
-                 className="mx-auto max-h-[100px] w-auto object-contain border rounded-md"
-               />
-             </div>
-           )}
-           <div className="flex justify-end mt-2">
-             <Button type="submit" disabled={isSubmitting}>
-               {isSubmitting ? (
-                 <>
-                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                   Submitting...
-                 </>
-               ) : (
-                 "Submit"
-               )}
-             </Button>
-           </div>
-         </form>
-       </DialogContent>
+       <DialogContent className="w-full sm:max-w-2xl sm:w-[40vw] md:w-[60vw] lg:w-[50vw] px-4 py-6">
+  <DialogHeader>
+    <DialogTitle>Payment Details</DialogTitle>
+    <DialogDescription>
+      Scan the QR code to make payment and upload the screenshot
+    </DialogDescription>
+  </DialogHeader>
+  <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="flex flex-col items-center justify-center">
+      <div className="border border-border p-3 rounded-lg mb-2">
+        <Image
+          src={qr || "/placeholder.svg"}
+          alt="Payment QR Code"
+          width={200}
+          height={200}
+          className="mx-auto"
+        />
+      </div>
+      <p className="text-xs text-muted-foreground text-center">
+        Scan this QR code with your payment app
+      </p>
+    </div>
+    <Separator className="my-2" />
+    <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex-1 space-y-1">
+        <Label htmlFor="whatsapp" className="text-sm">
+          WhatsApp Number
+        </Label>
+        <Input
+          id="whatsapp"
+          type="text"
+          placeholder="Enter WhatsApp number"
+          value={whatsappNumber}
+          onChange={(e) => setWhatsappNumber(e.target.value)}
+          required
+          disabled={isSubmitting}
+        />
+      </div>
+      <div className="flex-1 space-y-1">
+        <Label htmlFor="payment-screenshot" className="text-sm">
+          Payment Screenshot
+        </Label>
+        <div className="flex items-center gap-2">
+          <Input
+            id="payment-screenshot"
+            type="file"
+            className="hidden"
+            accept="image/png, image/jpeg, image/jpg"
+            onChange={handleFileChange}
+            disabled={isSubmitting}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full h-10 flex items-center justify-center gap-2"
+            onClick={() =>
+              document.getElementById("payment-screenshot")?.click()
+            }
+            disabled={isSubmitting}
+          >
+            <FileIcon className="h-4 w-4" />
+            {paymentScreenshot ? "File Selected" : "Select File"}
+          </Button>
+          {paymentScreenshot && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={clearFile}
+              disabled={isSubmitting}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+    {previewUrl && (
+      <div className="mt-2">
+        <Image
+          src={previewUrl || "/placeholder.svg"}
+          alt="Payment Screenshot Preview"
+          width={300}
+          height={100}
+          className="mx-auto max-h-[100px] w-auto object-contain border rounded-md"
+        />
+      </div>
+    )}
+    <div className="flex justify-end mt-2">
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Submitting...
+          </>
+        ) : (
+          "Submit"
+        )}
+      </Button>
+    </div>
+    
+  </form>
+</DialogContent>
+
      </Dialog>
      
       

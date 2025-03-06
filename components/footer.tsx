@@ -35,7 +35,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/" className="text-muted-foreground transition-colors hover:text-primary">
-                  Careers
+                  Go to the top
                 </Link>
               </li>
             </ul>
