@@ -31,10 +31,11 @@ import { fetchCourses } from "@/store/courses/courseSlice";
 import { fetchCategories } from "@/store/category/categorySlice";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { createEnrollment } from "@/store/enrollements/enrollementSlice";
+import { createEnrollment, fetchEnrollments } from "@/store/enrollements/enrollementSlice";
 import { useSession } from "next-auth/react";
 import toast, { Toaster } from "react-hot-toast";
 import { Status } from "@/types/status.types";
+import { EnrollmentStatus } from "@/database/models/enrolement.schema";
 
 type Mentor = {
   _id: string;
@@ -61,9 +62,11 @@ type CoursesTeacherProps = {
   showBuyButton: boolean;
   routePrefix?: string;
   disableNavigation?: boolean;
+  showStudentCourses?: boolean;
+  showTeacherCourses?: boolean;
 };
 
-export default function CourseList({ showBuyButton = false, routePrefix='courses' ,disableNavigation = false }: CoursesTeacherProps) {
+export default function CourseList({ showBuyButton = false, routePrefix='courses' ,disableNavigation = false, showStudentCourses=false,showTeacherCourses=true}: CoursesTeacherProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceSort, setPriceSort] = useState<"asc" | "desc" | "none">("none");
   const dispatch = useAppDispatch();
@@ -135,9 +138,11 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
       ;(document.getElementById("payment-screenshot") as HTMLInputElement).value = ""
     }
   }
-  const { status } = useAppSelector((state) => state.enrollments);
-
-  const { courses } = useAppSelector((state) => state.courses);
+  const { enrollments } = useAppSelector((state) => state.enrollments);
+useEffect(() => {
+    dispatch(fetchEnrollments());
+  }, [dispatch]); 
+   const { courses } = useAppSelector((state) => state.courses);
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
@@ -159,7 +164,24 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
       }
       return 0;
     });
+//my courses for student 
+const enrolledCourseIds = enrollments
+  .filter(
+    (enrollment) =>
+      enrollment.student._id === session?.user.id &&
+      enrollment.enrollmentStatus === EnrollmentStatus.APPROVE
+  )
+  .map((enrollment) => enrollment.course._id);
 
+const enrolledCourses = courses.filter((course) =>
+  enrolledCourseIds.includes(course._id)
+);
+//my courses for teacher 
+const teachersCourse = courses.filter(
+  (course) => course.mentor.username === session?.user.name
+)
+
+const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? teachersCourse: filteredCourses;
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
@@ -198,169 +220,163 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
-            <Card key={course._id} className="overflow-hidden">
-              <Image
-                height={192}
-                width={384}
-                src={course.thumbnail ? course.thumbnail : "/placeholder.png"}
-                alt={course.courseName}
-                className="w-full h-48 object-cover"
-              />
-              <CardHeader>
-              {!disableNavigation && routePrefix ? (
-                  <Link href={`${routePrefix}/${course._id}`}>
-                    <h3 className="text-xl font-semibold cursor-pointer hover:underline">
-                      {course.courseName}
-                    </h3>
-                  </Link>
-                ) : (
-                  <h3 className="text-xl font-semibold">{course.courseName}</h3>
-                )}
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm md:text-base text-gray-600 mb-4">{course.courseDescription}</p>
-                <div className="flex items-center gap-4 text-xs md:text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {course.courseDuration}
-                  </div>
-                  <div className="flex items-center">
-                    <Tag className="w-4 h-4 mr-1" />
-                    {course.category.name}
-                  </div>
-                  <div className="flex items-center">
-                    <User className="w-4 h-4 mr-1" />
-                    {course.mentor.username}
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center">
-                <p className="text-lg font-bold">Rs.{course.coursePrice}</p>
-                {showBuyButton && (
-              <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
+      {coursesToShow.length > 0 ? (
+  coursesToShow.map((course) => (
+    <Card key={course._id} className="overflow-hidden">
+      <Image
+        height={192}
+        width={384}
+        src={course.thumbnail ? course.thumbnail : "/placeholder.png"}
+        alt={course.courseName}
+        className="w-full h-48 object-cover"
+      />
+      <CardHeader>
+        {!disableNavigation && routePrefix ? (
+          <Link href={`${routePrefix}/${course._id}`}>
+            <h3 className="text-xl font-semibold cursor-pointer hover:underline">
+              {course.courseName}
+            </h3>
+          </Link>
+        ) : (
+          <h3 className="text-xl font-semibold">{course.courseName}</h3>
+        )}
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm md:text-base text-gray-600 mb-4">{course.courseDescription}</p>
+        <div className="flex items-center gap-4 text-xs md:text-sm text-gray-500">
+          <div className="flex items-center">
+            <Clock className="w-4 h-4 mr-1" />
+            {course.courseDuration}
+          </div>
+          <div className="flex items-center">
+            <Tag className="w-4 h-4 mr-1" />
+            {course.category.name}
+          </div>
+          <div className="flex items-center">
+            <User className="w-4 h-4 mr-1" />
+            {course.mentor.username}
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between items-center">
+        <p className="text-lg font-bold">Rs.{course.coursePrice}</p>
+        {showBuyButton && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4" />
-                  Enroll Now</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Payment Details</DialogTitle>
-                  <DialogDescription>Scan the QR code to make payment and upload the screenshot</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="border border-border p-3 rounded-lg mb-2">
-                      <Image
-                        src={qr || "/placeholder.svg"}
-                        alt="Payment QR Code"
-                        width={200}
-                        height={200}
-                        className="mx-auto"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground text-center">Scan this QR code with your payment app</p>
+                Enroll Now
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Payment Details</DialogTitle>
+                <DialogDescription>Scan the QR code to make payment and upload the screenshot</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="border border-border p-3 rounded-lg mb-2">
+                    <Image
+                      src={qr || "/placeholder.svg"}
+                      alt="Payment QR Code"
+                      width={200}
+                      height={200}
+                      className="mx-auto"
+                    />
                   </div>
-        
-                  <Separator className="my-2" />
-        
-                  <div className="flex flex-row gap-4">
-                    <div className="flex-1 space-y-1">
-                      <Label htmlFor="whatsapp" className="text-sm">
-                        WhatsApp Number
-                      </Label>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Scan this QR code with your payment app
+                  </p>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex flex-row gap-4">
+                  <div className="flex-1 space-y-1">
+                    <Label htmlFor="whatsapp" className="text-sm">
+                      WhatsApp Number
+                    </Label>
+                    <Input
+                      id="whatsapp"
+                      type="text"
+                      placeholder="Enter WhatsApp number"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <Label htmlFor="payment-screenshot" className="text-sm">
+                      Payment Screenshot
+                    </Label>
+                    <div className="flex items-center gap-2">
                       <Input
-                        id="whatsapp"
-                        type="text"
-                        placeholder="Enter WhatsApp number"
-                        value={whatsappNumber}
-                        onChange={(e) => setWhatsappNumber(e.target.value)}
-                        required
+                        id="payment-screenshot"
+                        type="file"
+                        className="hidden"
+                        accept="image/png, image/jpeg, image/jpg"
+                        onChange={handleFileChange}
                         disabled={isSubmitting}
                       />
-                    </div>
-        
-                    <div className="flex-1 space-y-1">
-                      <Label htmlFor="payment-screenshot" className="text-sm">
-                        Payment Screenshot
-                      </Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          id="payment-screenshot"
-                          type="file"
-                          className="hidden"
-                          accept="image/png, image/jpeg, image/jpg"
-                          onChange={handleFileChange}
-                          
-                          disabled={isSubmitting}
-                        />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-10 flex items-center justify-center gap-2"
+                        onClick={() =>
+                          document.getElementById("payment-screenshot")?.click()
+                        }
+                        disabled={isSubmitting}
+                      >
+                        <FileIcon className="h-4 w-4" />
+                        {paymentScreenshot ? "File Selected" : "Select File"}
+                      </Button>
+                      {paymentScreenshot && (
                         <Button
                           type="button"
-                          variant="outline"
-                          size="sm"
-                          className="w-full h-10 flex items-center justify-center gap-2"
-                          onClick={() => document.getElementById("payment-screenshot")?.click()}
+                          variant="ghost"
+                          size="icon"
+                          onClick={clearFile}
                           disabled={isSubmitting}
                         >
-                          <FileIcon className="h-4 w-4" />
-                          {paymentScreenshot ? "File Selected" : "Select File"}
+                          <X className="h-4 w-4" />
                         </Button>
-                        {paymentScreenshot && (
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={clearFile}
-                            disabled={isSubmitting}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-        
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <Image
-                        src={previewUrl || "/placeholder.svg"}
-                        alt="Payment Screenshot Preview"
-                        width={300}
-                        height={100}
-                        className="mx-auto max-h-[100px] w-auto object-contain border rounded-md"
-                      />
-                    </div>
-                  )}
-        
-                  <div className="flex justify-end mt-2">
-                  <Button  type="submit" 
-                      disabled={isSubmitting}
-                      >{isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit"
                       )}
-                  </Button>
+                    </div>
                   </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-           )
-         }
-                
-              </CardFooter>
-            </Card>
-          ))
-        ) : (
-          <div className="col-span-3 flex items-center justify-center py-12">
-            <p className="text-gray-600">No courses found.</p>
-          </div>
+                </div>
+                {previewUrl && (
+                  <div className="mt-2">
+                    <Image
+                      src={previewUrl || "/placeholder.svg"}
+                      alt="Payment Screenshot Preview"
+                      width={300}
+                      height={100}
+                      className="mx-auto max-h-[100px] w-auto object-contain border rounded-md"
+                    />
+                  </div>
+                )}
+                <div className="flex justify-end mt-2">
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      "Submit"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         )}
+      </CardFooter>
+    </Card>
+  ))
+) : (
+  <p className="text-center text-gray-600">No courses available.</p>
+)}
       </div>
       <Toaster position="bottom-right" reverseOrder={false} />
 

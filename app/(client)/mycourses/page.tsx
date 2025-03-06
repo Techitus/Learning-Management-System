@@ -7,7 +7,7 @@ const page = () => {
     <div>
 
         <Navbar/>
-    <CourseList showBuyButton={false} routePrefix='mycourses'  disableNavigation={false} />
+    <CourseList showBuyButton={false} routePrefix='mycourses'  disableNavigation={false} showStudentCourses={true} showTeacherCourses={false} />
     </div>
   )
 }
