@@ -1,37 +1,52 @@
 import dbConnect from "@/database/connection"
 import Lessons from "@/database/models/lesson.schema"
 import { authMiddleware } from "@/middleware/auth.middleware"
+import { mkdir, writeFile } from "fs/promises"
+import mongoose from "mongoose"
 import { NextRequest } from "next/server"
+import path from "path"
 
-export async function createLessons(request:Request){
-    try{
-        await dbConnect()
-       const authResponse = await authMiddleware(request as NextRequest)
-       if(!authResponse){
-            return Response.json({
-                message : "You are not authorized to perform this action 😒"
-            },{status:401})
-       }
-       const {title,description,videoUrl,course} = await request.json()
-       const lesson = await Lessons.create({
+
+export async function createLessons(request: Request) {
+    try {
+      await dbConnect();
+
+  
+      const formData = await request.formData();
+      const title = formData.get("title") as string;
+      const description = formData.get("description") as string;
+      const course = new mongoose.Types.ObjectId(formData.get("course") as string);
+      const file = formData.get("videoUrl") as File | null;
+      
+      let vedioPath = "";
+      if (file) {
+        const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        await mkdir(uploadDir, { recursive: true });
+        const filePath = path.join(uploadDir, filename);
+        const bytes = await file.arrayBuffer();
+        await writeFile(filePath, Buffer.from(bytes));
+        vedioPath = `/uploads/${filename}`;
+      }
+  
+      const newLesson = await Lessons.create({
         title,
         description,
-        videoUrl,
-        course
-       })
-       return Response.json({
-        message : "Lessons created successfully 😍 ",
-        data : lesson
-       },{status : 200 })
-
-    }catch(error){
-        console.log(error)
-        return Response.json({
-            message : "Error creating lessons 🙃"
-        },{status:500})
+        videoUrl: vedioPath,
+        course,        
+      });
+  
+      return Response.json(
+        { message: "Lesson created successfully 🎉", data: newLesson },
+        { status: 201 }
+      );
+    } catch (error) {
+      return Response.json(
+        { message: "Error creating lessons 😢", error: (error as Error).message },
+        { status: 500 }
+      );
     }
-}
-
+  }
 export async function fetchLessons(request:Request){
     try{
      await dbConnect()

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { ILesson, ILessonInitialState } from "./types";
+import {  ILessonInitialState } from "./types";
 import { Status } from "@/types/status.types";
 import { AppDispatch } from "../store";
 import API from "@/http";
@@ -53,10 +53,14 @@ export function fetchLessons(id:string){
         }
     }
 }
-export function createLesson(data:ILesson){
+export function createLesson(data:FormData){
     return async function createLessonThunk(dispatch:AppDispatch){
         try {
-            const response = await API.post("/lesson",data)
+            const response = await API.post("/lesson",data,{headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+            )
             if(response.status == 201){
                 dispatch(setStatus(Status.SUCCESS))
                 dispatch(addLesson(response.data.data))
