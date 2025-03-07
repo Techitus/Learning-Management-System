@@ -5,6 +5,7 @@ export interface ILesson{
     title : string,
     description : string,
     videoUrl : string,
+    ytVideoUrl : string,
     course : string,
     
 }

@@ -12,7 +12,6 @@ import { Trash2, Video, PlusCircle } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useParams } from "next/navigation";
 import { createLesson, deleteLesson, fetchLessons,  } from "@/store/Lessons/lessonSlice";
-import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +30,8 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  
+  const [videoUrl, setVideoUrl] = useState("");
+
   const dispatch = useAppDispatch();
   const data = useParams();
   const courseId = data.id;
@@ -48,22 +48,23 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
   };
 
   const handleUpload = () => {
-    if (!title || !description || !videoFile) {
+    if (!title || !description ) {
       alert("Please fill all fields and select a video file.");
       return;
     }
-  
-  
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("videoUrl", videoFile);
+    formData.append("videoUrl", videoFile as File); 
+    formData.append("ytVideoUrl", videoUrl);
     formData.append("course", courseId as string);
 
     dispatch(createLesson(formData)).then(() => {
       setIsDialogOpen(false);
       setTitle("");
       setDescription("");
+      setVideoUrl("");
       setVideoFile(null);
     });
     toast.success("Lesson uploaded successfully!", {
@@ -118,8 +119,9 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
                 </AlertDialog>
                 )}
               </div>
-              <Link href="">
-                <video
+              {
+                lesson.videoUrl ? (
+                  <video
                   width={320}
                   height={240}
                   controls
@@ -134,7 +136,14 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
                   />
                   Your browser does not support the video tag.
                 </video>
-              </Link>
+                ): lesson.ytVideoUrl ? (
+                  <iframe width="full"
+                  height={260} src={lesson.ytVideoUrl} allowFullScreen />
+                ) : (
+                  <p>No video available</p>
+                )}
+              
+               
             </CardHeader>
             <CardContent className="pt-4">
               <CardTitle className="text-xl mb-2">{lesson.title}</CardTitle>
@@ -167,6 +176,11 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
                   <Label htmlFor="description">Description</Label>
                   <Textarea id="description" placeholder="Enter lesson description" value={description} onChange={(e) => setDescription(e.target.value)} />
                 </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="videoUrl">Video URL</Label>
+                  <Textarea id="videoUrl" placeholder="Enter url of your video" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+                </div>
+
                 <div className="grid gap-2">
                   <Label htmlFor="video">Video</Label>
                   <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center gap-2">

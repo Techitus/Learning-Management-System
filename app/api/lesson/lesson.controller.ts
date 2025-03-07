@@ -15,11 +15,12 @@ export async function createLessons(request: Request) {
       const formData = await request.formData();
       const title = formData.get("title") as string;
       const description = formData.get("description") as string;
+      const ytVideoUrl = formData.get("ytVideoUrl") as string;
       const course = new mongoose.Types.ObjectId(formData.get("course") as string);
       const file = formData.get("videoUrl") as File | null;
       
       let vedioPath = "";
-      if (file) {
+      if (file && file.name ) {
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
         const uploadDir = path.join(process.cwd(), 'public', 'uploads');
         await mkdir(uploadDir, { recursive: true });
@@ -32,6 +33,7 @@ export async function createLessons(request: Request) {
       const newLesson = await Lessons.create({
         title,
         description,
+        ytVideoUrl,
         videoUrl: vedioPath,
         course,        
       });

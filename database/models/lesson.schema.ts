@@ -3,7 +3,8 @@ interface ILesson extends Document {
    course : mongoose.Types.ObjectId
    title : string,
    description : string,
-   videoUrl : string,
+   videoUrl?: string,
+   ytVideoUrl?: string,
    createdAt : Date
 }
 const lessonSchema = new Schema<ILesson>({
@@ -21,7 +22,9 @@ const lessonSchema = new Schema<ILesson>({
        },
        videoUrl : {
         type : String,
-        required : true
+       },
+       ytVideoUrl : {
+        type : String,
        },
        createdAt : {
         type : Date,
