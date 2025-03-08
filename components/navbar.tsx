@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { Menu, Search, X } from "lucide-react";
+import { Menu,  X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,12 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Role } from "@/database/models/user.schema";
 import { Input } from "./ui/input";
 
+import GlobalSearch from "./global-search";
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
   const [mounted, setMounted] = useState(false);
-
+  
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -83,11 +85,12 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "unset";
+    document.body.style.overflow = isOpen ? "relative" : " ";
     return () => {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+  
 
   const UserMenu = () => (
     <DropdownMenu>
@@ -125,7 +128,8 @@ export default function Navbar() {
           <Input
                 placeholder="Search..."
                 className="pl-7 pr-4 ml-8 py-2 w-3/4 bg-white/10 hover:bg-white/20 focus:bg-white/20 transition-colors border-transparent focus:border-primary"
-              />          </Link>
+              />          
+          </Link>
           {mounted && session ? (
             <UserMenu />
           ) : (
@@ -142,16 +146,9 @@ export default function Navbar() {
             <span className="font-bold text-2xl">Learnify</span>
           </Link>
           <div className="flex items-center justify-center flex-1">
-          <form className="w-full max-w-lg space-x-10">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses, students, or teachers..."
-                className="pl-9 pr-4 py-2 w-full bg-white/10 hover:bg-white/20 focus:bg-white/20 transition-colors border-transparent focus:border-primary"
-              />
-            </div>
-          </form>
-          <nav className="flex  space-x-6 text-sm font-medium ml-20">
+          <GlobalSearch />
+
+          <nav className="flex space-x-6 text-sm font-medium ml-20">
             <Link href="/allcourses" className="transition-colors hover:text-primary">
               All Courses
             </Link>
@@ -180,20 +177,21 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 left-0 z-50 w-64 bg-background shadow-lg lg:hidden"
-          >
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between p-4 border-b">
-              <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold text-xl">Learnify</span>
-          </Link>                <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Close menu">
+  initial={{ x: "-100%" }}
+  animate={{ x: 0 }}
+  exit={{ x: "-100%" }}
+  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+  className="fixed inset-0 z-[9999] w-full h-full bg-black/20 lg:hidden"
+>
+
+<div className="fixed inset-y-0 left-0 w-64 bg-background shadow-lg">
+<div className="flex items-center justify-between p-4 border-b">
+                <Link href="/" className="mr-6 flex items-center space-x-2">
+                  <span className="font-bold text-xl">Learnify</span>
+                </Link>
+                <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Close menu">
                   <X className="h-10 w-10 " />
                 </Button>
-              
               </div>
               
               <nav className="flex flex-col p-4 space-y-4 bg-black/60">

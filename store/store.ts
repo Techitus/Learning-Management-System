@@ -5,6 +5,7 @@ import courseSlice from './courses/courseSlice'
 import lessonSlice from './Lessons/lessonSlice'
 import noteSlice from './Notes/noteSlice'
 import enrollmentSlice from './enrollements/enrollementSlice'
+import searchSlice from './search/searchSlice'
 export const makeStore = () => {
   return configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const makeStore = () => {
         lessons : lessonSlice,
         notes : noteSlice,
         enrollments : enrollmentSlice,
+        search : searchSlice
 
     },
   })
