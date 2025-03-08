@@ -255,7 +255,7 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
         )}
       </CardHeader>
       <CardContent>
-        <p className="text-sm md:text-base text-gray-600 mb-4">{course.courseDescription}</p>
+        <p className="text-xs md:text-base text-gray-600 mb-4">{course.courseDescription}</p>
         <div className="flex items-center gap-4 text-xs md:text-sm text-gray-500">
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-1" />
@@ -265,7 +265,7 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
             <Tag className="w-4 h-4 mr-1" />
             {course.category.name}
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center ">
             <User className="w-4 h-4 mr-1" />
             {course.mentor.username}
           </div>

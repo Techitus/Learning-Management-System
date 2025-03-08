@@ -11,12 +11,12 @@ export default function AccessDenied() {
       <div className="absolute right-0 top-0 h-[300px] w-[300px] md:h-[500px] md:w-[500px] bg-green-500/10 blur-[80px] md:blur-[100px]" />
       <div className="absolute bottom-0 left-0 h-[300px] w-[300px] md:h-[500px] md:w-[500px] bg-green-300/10 blur-[80px] md:blur-[100px]" />
 
-      <div className="relative max-w-sm w-full bg-white p-6 md:p-8 rounded-2xl shadow-xl text-center">
+      <div className="relative max-w-sm w-full  p-6 md:p-8 rounded-2xl shadow-xl text-center">
         <div className="mb-6">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mb-4">
             <ShieldX className="w-7 h-7 text-red-600" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Access Denied</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Access Denied</h1>
           <p className="text-gray-600 text-sm md:text-base">
             Sorry, but you don't have permission to access this page. Please contact your administrator if you believe this is a mistake.
           </p>

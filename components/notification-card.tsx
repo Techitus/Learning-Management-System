@@ -5,12 +5,12 @@ import Image from "next/image"
 
 export default function Notifications() {
   return (
-    <Card className="bg-black text-white border-zinc-800 h-full   2xl:h-[35vh]">
+    <Card className="bg-black text-white border-zinc-800 h-full max-h-[50vh] md:h-[35vh] 2xl:h-[40vh] overflow-y-auto">
       <CardHeader>
         <CardTitle className="text-lg font-medium">Notifications</CardTitle>
         <p className="text-sm text-zinc-400">You have 5 unread notifications</p>
       </CardHeader>
-      <CardContent className="space-y-4 h-[15vh] 2xl:h-[25vh]">
+      <CardContent className="space-y-4">
         <div className="flex items-center space-x-4">
           <Avatar className="h-9 w-9 border border-zinc-700">
             <Image src="/placeholder.svg?height=32&width=32" alt="Avatar" width={32} height={32}/>
@@ -46,7 +46,7 @@ export default function Notifications() {
 
         <div className="flex items-center space-x-4">
           <Avatar className="h-9 w-9 border border-zinc-700">
-          <Image src="/placeholder.svg?height=32&width=32" alt="Avatar" width={32} height={32}/>
+            <Image src="/placeholder.svg?height=32&width=32" alt="Avatar" width={32} height={32}/>
           </Avatar>
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium leading-none">Team invite</p>
@@ -54,10 +54,7 @@ export default function Notifications() {
           </div>
           <p className="text-xs text-zinc-400">2d ago</p>
         </div>
-
-        
       </CardContent>
     </Card>
   )
 }
-

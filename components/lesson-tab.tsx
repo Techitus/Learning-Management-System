@@ -24,6 +24,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import toast, { Toaster } from "react-hot-toast";
+import { Status } from "@/types/status.types";
+import { ClockLoader } from "react-spinners";
 
 export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEnable?: boolean }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -35,12 +37,23 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
   const dispatch = useAppDispatch();
   const data = useParams();
   const courseId = data.id;
-  const { lessons } = useAppSelector((state) => state.lessons);
+  const { lessons,status } = useAppSelector((state) => state.lessons);
 
   useEffect(() => {
     dispatch(fetchLessons(courseId as string));
   }, [courseId]);
-
+  useEffect(()=>{
+    if(status === Status.LOADING){
+      <div>
+  <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+          <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-green-500/10 blur-[100px]" />
+          <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-green-300/10 blur-[100px]" />
+              <div className="h-screen flex items-center justify-center ">
+        <ClockLoader color="#ffffff" />
+      </div>
+      </div>
+    }
+  },[status])
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setVideoFile(event.target.files[0]);
@@ -178,12 +191,12 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="videoUrl">Video URL</Label>
-                  <Textarea id="videoUrl" placeholder="Enter url of your video" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+                  <Input id="videoUrl" placeholder="Enter url of your video" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="video">Video</Label>
-                  <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center gap-2">
+                  <div className="border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center gap-2">
                     <Video className="h-8 w-8 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Drag and drop your video file here or click to browse</p>
                     <Input id="video" type="file" accept="video/*" className="hidden" onChange={handleFileChange} />

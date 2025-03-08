@@ -39,10 +39,7 @@ import { ICourses } from "@/store/courses/types"
 import { fetchCourses } from "@/store/courses/courseSlice"
 import { EnrollmentStatus } from "@/database/models/enrolement.schema"
 
-interface ICategory {
-  _id: string;
-  name: string;
-}
+
 
 interface IUser {
   _id: string;
@@ -58,9 +55,10 @@ interface IUser {
 interface UserCardProps {
   users: IUser[];
   showAdminEnroll?: boolean;
+  isAdminPage?: boolean;
 }
 
-export default function UserCard({ users, showAdminEnroll=false }: UserCardProps) {
+export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = true }: UserCardProps) {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector((state) => state.categories);
   const {courses} = useAppSelector((state) => state.courses);
@@ -199,14 +197,14 @@ export default function UserCard({ users, showAdminEnroll=false }: UserCardProps
           value={selectedCourse} 
           onValueChange={(value) => setSelectedCourse(value)}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="xl:w-[180px]">
             <SelectValue placeholder="Filter by Course" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Courses</SelectItem>
-            {categories.map((category: ICategory) => (
-              <SelectItem key={category._id} value={category._id}>
-                {category.name}
+            {courses.map((course: ICourses) => (
+              <SelectItem key={course._id} value={course._id}>
+                {course.courseName}
               </SelectItem>
             ))}
           </SelectContent>
@@ -216,7 +214,7 @@ export default function UserCard({ users, showAdminEnroll=false }: UserCardProps
           value={dateSort} 
           onValueChange={(value: "latest" | "oldest" | "none") => setDateSort(value)}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="xl:w-[180px]">
             <SelectValue placeholder="Sort by Join Date" />
           </SelectTrigger>
           <SelectContent>
@@ -231,6 +229,10 @@ export default function UserCard({ users, showAdminEnroll=false }: UserCardProps
         {filteredUsers.map((user) => (
           <div key={user._id} className="bg-black/80 shadow-md rounded-lg overflow-hidden text-white relative">
             <div className="absolute top-2 right-2">
+              {
+                isAdminPage && (
+
+                
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
@@ -260,6 +262,8 @@ export default function UserCard({ users, showAdminEnroll=false }: UserCardProps
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+              )
+            }
             </div>
             <div className="p-4">
               <div className="flex items-center space-x-4">
