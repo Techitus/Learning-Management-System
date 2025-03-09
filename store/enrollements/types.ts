@@ -20,7 +20,7 @@ export interface IEnrollment {
     whatsapp : string,
     paymentVerification : string,
     enrollmentStatus : EnrollmentStatus,
-    enrollAt : Date,
+    enrollAt : Date | string,
 }
 
 export interface IEnrollmentState {
