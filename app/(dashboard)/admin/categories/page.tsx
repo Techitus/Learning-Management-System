@@ -123,7 +123,7 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Categories</h1>
+        <h1 className="text-2xl xl:text-3xl font-bold text-white">Categories</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button
@@ -174,7 +174,7 @@ export default function Home() {
               className="flex items-center justify-between p-4 hover:bg-black/50"
             >
               <span className="text-lg text-white/90">{category.name}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4 text-sm">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -209,11 +209,6 @@ export default function Home() {
               </div>
             </div>
           ))}
-          {categories.length === 0 && (
-            <div className="p-8 text-center text-gray-500">
-              No categories found. Click the Add Category button to create one.
-            </div>
-          )}
         </div>
       </div>
       <Toaster position="bottom-right" reverseOrder={false} />

@@ -228,26 +228,17 @@ export default function Home() {
   const filteredCourses = courses
     .filter((course) =>
       selectedCategory === "all" ? true : course.category.name === selectedCategory
-    )
-    .sort((a, b) => {
-      if (priceSort === "asc") {
-        return parseFloat(String(a.coursePrice)) - parseFloat(String(b.coursePrice));
-      }
-      if (priceSort === "desc") {
-        return parseFloat(String(b.coursePrice)) - parseFloat(String(a.coursePrice));
-      }
-      return 0;
-    });
+    );
 
   const {users} = useAppSelector((state) => state.users);
   const mentors = users.filter((user) => user.role === Role.Teacher);
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex gap-4 items-center">
+      <div className="flex justify-between items-center mb-8 ">
+        <div className="flex gap-4 items-center ">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="xl:w-[180px]">
               <SelectValue placeholder="Filter by Category" />
             </SelectTrigger>
             <SelectContent>
@@ -260,16 +251,8 @@ export default function Home() {
             </SelectContent>
           </Select>
 
-          <Select value={priceSort} onValueChange={(value: "asc" | "desc" | "none") => setPriceSort(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by Price" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Default</SelectItem>
-              <SelectItem value="asc">Price: Low to High</SelectItem>
-              <SelectItem value="desc">Price: High to Low</SelectItem>
-            </SelectContent>
-          </Select>
+        
+
           
           
         </div>
@@ -289,164 +272,156 @@ export default function Home() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{isEditing ? 'Edit Course' : 'Add New Course'}</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="courseName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Course Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter course name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+  <DialogHeader>
+    <DialogTitle>{isEditing ? 'Edit Course' : 'Add New Course'}</DialogTitle>
+  </DialogHeader>
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <FormField
+        control={form.control}
+        name="courseName"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Course Name</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter course name" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      
+      <div className="flex  flex-row gap-4">
+        <FormField
+          control={form.control}
+          name="coursePrice"
+          render={({ field }) => (
+            <FormItem className="w-full sm:w-1/2">
+              <FormLabel>Price</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="999" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="mentor"
+          render={({ field }) => (
+            <FormItem className="w-full sm:w-1/2">
+              <FormLabel>Mentor</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select mentor" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {mentors.map((mentor) => (
+                    <SelectItem key={mentor._id} value={mentor._id}>
+                      {mentor.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={form.control}
+        name="thumbnail"
+        render={({ field: { value, onChange, ...field } }) => (
+          <FormItem>
+            <FormLabel>Cover Image</FormLabel>
+            <FormControl>
+              <Input type="file" accept="image/*" onChange={handleFileChange} {...field} />
+            </FormControl>
+            {imagePreview && (
+              <div className="mt-2">
+                <Image 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  height={100} 
+                  width={200} 
+                  className="object-cover rounded" 
                 />
-                <FormField
-                  control={form.control}
-                  name="coursePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="999"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="mentor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mentor</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select mentor" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {mentors.map((mentor) => (
-                            <SelectItem key={mentor._id} value={mentor._id}>
-                              {mentor.username}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="thumbnail"
-                  render={({ field: { value, onChange, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>Cover Image</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          {...field}
-                        />
-                      </FormControl>
-                      {imagePreview && (
-                        <div className="mt-2">
-                          <Image 
-                            src={imagePreview} 
-                            alt="Preview" 
-                            height={100} 
-                            width={200} 
-                            className="object-cover rounded" 
-                          />
-                        </div>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="courseDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Enter course description"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="courseDuration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Duration</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 12 weeks" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category._id} value={category._id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={isSubmitting || status === Status.LOADING}
-                >
-                  {isSubmitting ? 'Please wait...' : isEditing ? 'Update Course' : 'Add Course'}
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
+              </div>
+            )}
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="courseDescription"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea placeholder="Enter course description" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="flex flex-row gap-4">
+        <FormField
+          control={form.control}
+          name="courseDuration"
+          render={({ field }) => (
+            <FormItem className="w-full sm:w-1/2">
+              <FormLabel>Duration</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 12 weeks" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem className="w-full sm:w-1/2">
+              <FormLabel>Category</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category._id} value={category._id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <Button 
+        type="submit" 
+        className="w-full"
+        disabled={isSubmitting || status === Status.LOADING}
+      >
+        {isSubmitting ? 'Please wait...' : isEditing ? 'Update Course' : 'Add Course'}
+      </Button>
+    </form>
+  </Form>
+</DialogContent>
+
         </Dialog>
       </div>
 
@@ -454,81 +429,81 @@ export default function Home() {
         {filteredCourses.length > 0 ? filteredCourses.map((course) => (
           <Card key={course._id} className="overflow-hidden">
 
-            <Image 
-              height={192}
-              width={384}
-              src={course.thumbnail ? course.thumbnail : '/placeholder.png'}
-              alt={course.courseName}
-              className="w-full h-48 object-cover"
-            />
-            <CardHeader>
-              <Link href={`/admin/courses/${course._id}`}>
-              <h3 className="text-xl font-semibold">{course.courseName}</h3>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">{course.courseDescription}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {course.courseDuration}
-                </div>
-                <div className="flex items-center">
-                  <Tag className="w-4 h-4 mr-1" />
-                  {course.category.name}
-                </div>
-                <div className="flex items-center">
-                  <User className="w-4 h-4 mr-1" />
-                  {course.mentor.username}
-                </div>
+          <Image 
+            height={192}
+            width={384}
+            src={course.thumbnail ? course.thumbnail : '/placeholder.png'}
+            alt={course.courseName}
+            className="w-full h-48 object-cover"
+          />
+          <CardHeader>
+            <Link href={`/admin/courses/${course._id}`}>
+            <h3 className="text-xl font-semibold cursor-pointer hover:underline">{course.courseName}</h3>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs xl:text-sm 2xl:text-base text-gray-600 mb-4">{course.courseDescription}</p>
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                {course.courseDuration}
               </div>
-            </CardContent>
-            <CardFooter className="flex justify-between items-center">
-              <p className="text-lg font-bold">Rs.{course.coursePrice}</p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleEdit(course)}
-                >
-                  <FilePenLine className="h-4 w-4 opacity-80" />
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4 text-red-500 opacity-80" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. Please type "{course.courseName}" to confirm deletion.
-                        <Input
-                          className="mt-2"
-                          value={deleteConfirmName}
-                          onChange={(e) => setDeleteConfirmName(e.target.value)}
-                          placeholder="Type course name to confirm"
-                        />
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel onClick={() => setDeleteConfirmName("")}>
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(course._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white"
-                        disabled={deleteConfirmName !== course.courseName}
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+              <div className="flex items-center">
+                <Tag className="w-4 h-4 mr-1" />
+                {course.category.name}
               </div>
-            </CardFooter>
-          </Card>
+              <div className="flex items-center">
+                <User className="w-4 h-4 mr-1" />
+                {course.mentor.username}
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between items-center">
+            <p className="text-lg font-bold">Rs.{course.coursePrice}</p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleEdit(course)}
+              >
+                <FilePenLine className="h-4 w-4 opacity-80" />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Trash2 className="h-4 w-4 text-red-500 opacity-80" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. Please type "{course.courseName}" to confirm deletion.
+                      <Input
+                        className="mt-2"
+                        value={deleteConfirmName}
+                        onChange={(e) => setDeleteConfirmName(e.target.value)}
+                        placeholder="Type course name to confirm"
+                      />
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setDeleteConfirmName("")}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(course._id)}
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                      disabled={deleteConfirmName !== course.courseName}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardFooter>
+        </Card>
         )) : (
           <div className="col-span-3 flex items-center justify-center py-12">
             <p className="text-gray-600">No courses found.</p>

@@ -214,7 +214,7 @@ export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = t
           value={dateSort} 
           onValueChange={(value: "latest" | "oldest" | "none") => setDateSort(value)}
         >
-          <SelectTrigger className="xl:w-[180px]">
+          <SelectTrigger className="xl:w-[180px] ">
             <SelectValue placeholder="Sort by Join Date" />
           </SelectTrigger>
           <SelectContent>

@@ -17,21 +17,21 @@ import {
 } from "@/components/ui/chart"
 
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
+  { month: "January", students: 186, enrollment: 80 },
+  { month: "February", students: 305, enrollment: 200 },
+  { month: "March", students: 237, enrollment: 120 },
+  { month: "April", students: 73, enrollment: 190 },
+  { month: "May", students: 209, enrollment: 130 },
+  { month: "June", students: 214, enrollment: 140 },
 ]
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  students: {
+    label: "students",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Mobile",
+  enrollment: {
+    label: "enrollment",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
@@ -48,14 +48,14 @@ export function Chart() {
   }
 
   return (
-    <Card className='h-[55vh] 2xl:h-[61vh]'>
+    <Card className='h-[50vh] md:h-[55vh] 2xl:h-[61vh] w-auto  hidden lg:block'>
       <CardHeader>
         <CardTitle>Data Analysis</CardTitle>
         <CardDescription>January - June 2025</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer className="h-[42vh] 2xl:h-[50vh] w-full" config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+        <ChartContainer className="h-[35vh] md:h-[42vh] 2xl:h-[50vh] w-full" config={chartConfig}>
+          <BarChart accessibilityLayer data={chartData} width={window.innerWidth < 768 ? 300 : 600}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -68,8 +68,8 @@ export function Chart() {
               cursor={false}
               content={<ChartTooltipContent indicator="dashed" />}
             />
-            <Bar dataKey="desktop" fill="white" radius={4} />
-            <Bar dataKey="mobile" fill="white" radius={4} />
+            <Bar dataKey="students" fill="white" radius={4} />
+            <Bar dataKey="enrollment" fill="white" radius={4} />
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { CartesianGrid, Line, LineChart } from "recharts"
 
 import {
@@ -16,32 +17,40 @@ import {
 } from "@/components/ui/chart"
 
 const chartData = [
-  { month: "January", desktop: 196 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 293 },
-  { month: "May", desktop: 229 },
-  { month: "June", desktop: 214 },
+  { month: "January", students: 196 },
+  { month: "February", students: 305 },
+  { month: "March", students: 237 },
+  { month: "April", students: 293 },
+  { month: "May", students: 229 },
+  { month: "June", students: 214 },
 ]
 
 const chartConfig = {
-  desktop: {
+  students: {
     label: "Revenue",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
 
 export function RevenueChart() {
+  const [chartWidth, setChartWidth] = useState(0)
+
+  useEffect(() => {
+    setChartWidth(window.innerWidth * 0.9) 
+  }, [])
+
+  if (chartWidth === 0) return null 
+
   return (
-    <Card className="hidden 2xl:block 2xl:h-[24vh] w-full">
+    <Card className="block h-[20vh] md:h-[16vh] xl:h-[16vh] 2xl:h-[18vh] w-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">Revenue Chart</CardTitle>
       </CardHeader>
       <CardContent className="h-full">
         <ChartContainer className="w-full h-full" config={chartConfig}>
           <LineChart
-            width={undefined} // Allow it to be responsive
-            height={200} // Set equivalent of h-[200px]
+            width={chartWidth} 
+            height={200}
             data={chartData}
             margin={{
               left: 12,
@@ -56,7 +65,7 @@ export function RevenueChart() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Line
-              dataKey="desktop"
+              dataKey="students"
               type="natural"
               stroke="white"
               strokeWidth={2}

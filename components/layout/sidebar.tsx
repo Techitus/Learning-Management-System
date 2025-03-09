@@ -13,7 +13,7 @@ import {
   TableOfContents,
   CircleUser,
   Store,
-  Menu,
+  
   X
 } from 'lucide-react';
 import Link from 'next/link';
@@ -86,7 +86,7 @@ export function Sidebar({ links, logo = "Learnify" }: SidebarProps) {
           onClick={() => setMobileOpen(!mobileOpen)}
           className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-gray-700 hover:bg-gray-800 transition-colors"
         >
-          {mobileOpen ? <X className="text-white" /> : <Menu className="text-white" />}
+          {mobileOpen ? <X className="text-white" /> : <BookOpen className="text-white" />}
         </button>
       )}
 

@@ -261,7 +261,7 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
             <Clock className="w-4 h-4 mr-1" />
             {course.courseDuration}
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center ">
             <Tag className="w-4 h-4 mr-1" />
             {course.category.name}
           </div>
@@ -296,7 +296,7 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
          
        </DialogTrigger>
         )}
-       <DialogContent className="w-full sm:max-w-2xl sm:w-[40vw] md:w-[60vw] lg:w-[50vw] px-4 py-6">
+       <DialogContent className="w-[90%] sm:max-w-2xl sm:w-[40vw] md:w-[60vw] lg:w-[50vw] px-4 py-6">
   <DialogHeader>
     <DialogTitle>Payment Details</DialogTitle>
     <DialogDescription>
