@@ -1,16 +1,14 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/database/connection";
 import User, { Role } from "@/database/models/user.schema";
-import NextAuth, {  Session,   } from "next-auth";
-import { } from "next-auth";
-
+import NextAuth, { Session, AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
-import { AdapterUser } from "next-auth/adapters";
 import { Account, Profile, User as NextAuthUser } from "next-auth";
-//@ts-ignore
+import { AdapterUser } from "next-auth/adapters";
+import { Awaitable } from "next-auth";
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
@@ -38,15 +36,21 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async signIn({user}:{user : {name : string, email : string, image : string}}) : Promise<boolean>{
+    async signIn({ user, account, profile }): Promise<boolean> {
       try {
         await dbConnect();
+        
+        if (!user.email) {
+          console.log("User email is missing");
+          return false;
+        }
+        
         const existingUser = await User.findOne({ email: user.email });
         if (!existingUser) {
           await User.create({
-            username: user.name,
+            username: user.name || 'Unknown User',
             email: user.email,
-            profileImage: user.image,
+            profileImage: user.image || '',
             role: Role.Student
           });
         }
@@ -58,6 +62,7 @@ export const authOptions: AuthOptions = {
     },
   },
 };
+
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
