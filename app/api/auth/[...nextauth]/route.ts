@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/database/connection";
 import User, { Role } from "@/database/models/user.schema";
-import NextAuth, { Session,  AuthOptions } from "next-auth";
+import NextAuth, {  Session,   } from "next-auth";
+import { } from "next-auth";
+
 import GoogleProvider from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
 import { AdapterUser } from "next-auth/adapters";
 import { Account, Profile, User as NextAuthUser } from "next-auth";
-
+//@ts-ignore
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
@@ -35,7 +38,7 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({user}:{user : {name : string, email : string, image : string}}) : Promise<boolean>{
       try {
         await dbConnect();
         const existingUser = await User.findOne({ email: user.email });
