@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dbConnect from "@/database/connection";
 import User, { Role } from "@/database/models/user.schema";
-import NextAuth, { Session, NextAuthOptions } from "next-auth";
+import NextAuth, { Session,  AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { JWT } from "next-auth/jwt";
 import { AdapterUser } from "next-auth/adapters";
 import { Account, Profile, User as NextAuthUser } from "next-auth";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
