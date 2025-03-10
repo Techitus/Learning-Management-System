@@ -196,7 +196,9 @@ if (status === Status.LOADING) {
 }
 const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? teachersCourse: filteredCourses;
   return (
+    
     <div className="container mx-auto py-8">
+      
       <div className="flex justify-between items-center mb-8">
         <div className="flex gap-4 ">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>

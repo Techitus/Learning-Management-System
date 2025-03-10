@@ -155,7 +155,7 @@ export default function Navbar() {
             <Link href="/mycourses" className="transition-colors hover:text-primary">
               My Courses
             </Link>
-           
+            
           </nav>
         </div>
          

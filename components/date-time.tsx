@@ -30,16 +30,16 @@ export default function DateTimeCard() {
 
   if (dateTime === null) {
     return (
-      <Card className="bg-zinc-900 border-zinc-800">
-        <CardContent className="p-3">
-          <p className="text-white text-sm font-medium">Loading...</p>
+      <Card className="flex items-center justify-center h-full">
+        <CardContent className="p-4 mt-10">
+          <p className="text-white text-sm font-medium mt-10">Loading...</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800">
+    <Card className="bg-zinc-900 border-zinc-800 flex items-center justify-center h-full">
       <CardContent className="p-3">
         <p className="text-white text-sm font-medium">{dateTime}</p>
       </CardContent>

@@ -32,12 +32,13 @@ dispatch(fetchUsers())
 
   return (
     <div className="space-y-6 ">
-       <div className='md:flex space-y-6 md:space-y-0 justify-between items-center'>
+       <div className='md:flex space-y-6 md:space-y-0 justify-between items-center '>
        <div>
           <h1 className='text-white text-4xl text-center md:text-start'>Dashboard</h1>
         </div>
        <div >
         <DateTimeCard/>
+
        
        </div>
 
