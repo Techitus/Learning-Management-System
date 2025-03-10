@@ -1,20 +1,14 @@
-// pages/api/search.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-
-
 import dbConnect from '@/database/connection';
 import Courses from '@/database/models/course.schema';
 import User from '@/database/models/user.schema';
+import { NextRequest, NextResponse } from 'next/server';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get('query');
 
-  const { query } = req.query;
-
-  if (!query || typeof query !== 'string') {
-    return res.status(400).json({ message: 'Query parameter is required' });
+  if (!query) {
+    return NextResponse.json({ message: 'Query parameter is required' }, { status: 400 });
   }
 
   try {
@@ -22,7 +16,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const searchRegex = new RegExp(query, 'i');
 
-    
     const [courses, users] = await Promise.all([
       Courses.find({
         $or: [
@@ -39,12 +32,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }).limit(10).lean(),
     ]);
 
-    return res.status(200).json({
-      courses,
-      users,
-    });
+    return NextResponse.json({ courses, users }, { status: 200 });
   } catch (error) {
     console.error('Search error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

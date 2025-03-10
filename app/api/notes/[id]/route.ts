@@ -1,8 +1,9 @@
 import { deleteNote } from "../notes.controller";
+import {use} from "react"
 
+export  function DELETE(request: Request,     { params }: { params: Promise<{ id: string }> }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }
 ) {
-    const { id } = await params;
+    const { id } =  use(params);
     return deleteNote(id, request);
 }

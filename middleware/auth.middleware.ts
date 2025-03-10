@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { Role } from "@/database/models/user.schema"
 import { getServerSession } from "next-auth/next"
 import { NextRequest, NextResponse } from "next/server"
 import { Session } from "next-auth"
+import { authOptions } from "@/lib/authOptions"
 
 export const authMiddleware = async (request: NextRequest) => {
   const session = (await getServerSession(authOptions)) as Session | null

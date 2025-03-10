@@ -1,17 +1,16 @@
 import { NextRequest } from "next/server";
 import { deleteUser, promoteToTeacher } from "../user.controller";
+import {use} from 'react';
+export  function DELETE(request: Request,     { params }: { params: Promise<{ id: string }> }
 
-export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+
 ) {
-    const { id } = await params;
+    const { id } =  use(params);
     return deleteUser(id, request);
 }
-export async function PATCH(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+export  function PATCH(req: NextRequest,     { params }: { params: Promise<{ id: string }> }
+
 ) {
-    const { id } = await params;
-    return promoteToTeacher(id,request);
+    const { id } =  use(params);
+    return promoteToTeacher(id,req);
 }
