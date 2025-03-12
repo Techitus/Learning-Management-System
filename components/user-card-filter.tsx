@@ -60,8 +60,8 @@ interface UserCardProps {
 
 export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = true }: UserCardProps) {
   const dispatch = useAppDispatch();
-  const { categories } = useAppSelector((state) => state.categories);
   const {courses} = useAppSelector((state) => state.courses);
+  const {enrollments} = useAppSelector((state) => state.enrollments);
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
   const [dateSort, setDateSort] = useState<"latest" | "oldest" | "none">("none");
@@ -301,18 +301,29 @@ export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = t
                 </div>
                 <div className="flex items-center text-sm">
                   <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
-                  {user.mobile ? (
-                    <span>{user.mobile}</span>
-                  ) : (
-                    <span>Not available</span>
-                  )}
+                  <div className="flex items-center text-sm">
+  <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
+  {user.mobile ? (
+    <span>{user.mobile}</span> 
+  ) : (
+    (() => { 
+      const userEnrollment = enrollments.find((e) => e._id === user._id); 
+      return userEnrollment?.whatsapp ? ( 
+        <span>{userEnrollment.whatsapp} (WhatsApp)</span>
+      ) : (
+        <span>Not available</span> 
+      );
+    })() 
+  )}
+</div>
+
                 </div>
               </div>
               <div className="mt-4">
                 <h3 className="text-sm font-semibold mb-2">Courses:</h3>
                 <div className="flex flex-wrap gap-2">
                   {user.courses?.map((courseId) => {
-                    const category = categories.find(c => c._id === courseId);
+                    const course = courses.find(c => c._id === courseId);
                     return (
                       <span 
                         key={courseId} 
@@ -322,7 +333,7 @@ export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = t
                             : "bg-gray-900 text-blue-100"
                         }`}
                       >
-                        {category?.name || 'Unknown Course'}
+                        {course?.courseName || 'Unknown Course'}
                       </span>
                     );
                   })}
