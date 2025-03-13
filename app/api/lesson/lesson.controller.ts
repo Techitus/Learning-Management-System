@@ -19,7 +19,7 @@ export async function createLessons(request: Request) {
       const file = formData.get("videoUrl") as File | null;
       
       let vedioPath = "";
-      if (file) {
+      if (file && file instanceof File) {
            const bytes = await file.arrayBuffer();
            const buffer = Buffer.from(bytes);
            const uploadResponse = await new Promise((resolve, reject) => {

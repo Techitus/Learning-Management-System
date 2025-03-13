@@ -80,29 +80,34 @@ export default function LessonsTab({ isLessonTabEnable = true }: { isLessonTabEn
       setVideoUrl("");
       setVideoFile(null);
     });
-    toast.success("Lesson uploaded successfully!", {
-      style: {
-        borderRadius: "10px",
-        background: "#000",
-        color: "#fff",
-      },
-    });
+   
   };
 
   
 
   function handleDelete(lessonId: string): void {
     dispatch(deleteLesson(lessonId))
-     .then(() => {
-      toast.success("Lesson deleted successfully!", {
-        style: {
-          borderRadius: "10px",
-          background: "#000",
-          color: "#fff",
-        },
-      });      })
+     
     }
-
+    useEffect(() => {
+      if (status === Status.SUCCESS) {
+        toast.success("Action completed successfully!", {
+          style: {
+            borderRadius: "10px",
+            background: "#000",
+            color: "#fff",
+          },
+        });
+      } else if (status === Status.ERROR) {
+        toast.error("Action failed! Please try again.", {
+          style: {
+            borderRadius: "10px",
+            background: "#000",
+            color: "#fff",
+          },
+        });
+      }
+    }, [status]);
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
