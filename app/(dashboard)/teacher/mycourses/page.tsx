@@ -75,6 +75,7 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
   const { data: session } = useSession();
   const [whatsappNumber, setWhatsappNumber] = useState("")
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null)
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +97,7 @@ export default function CourseList({ showBuyButton = false, routePrefix='courses
       return
     }
       const student = session?.user?.id;
-    const course = courses.length > 0 ? courses[0]._id : null;
+      const course = selectedCourseId;
     
     const formData = new FormData()
     formData.append('whatsapp', whatsappNumber)
@@ -287,7 +288,9 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
                className="flex items-center gap-2"
                onClick={() => {
                  if (!enrolledCourses.some(enrolledCourse => enrolledCourse._id === course._id)) {
+                  setSelectedCourseId(course._id);
                    setOpen(true);  
+
                  }
                }}
              >

@@ -30,27 +30,7 @@ export async function createCourse(request: Request) {
     const file = formData.get("thumbnail") as File | null;
     
     let thumbnailPath = "";
-    if (file) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const uploadResponse = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          {
-            folder: "courses",
-            resource_type: "image", 
-            allowed_formats: ["jpg", "jpeg", "png", "webp"], 
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(buffer);
-      });
-
-      if (uploadResponse && typeof uploadResponse === "object" && "secure_url" in uploadResponse) {
-        thumbnailPath = uploadResponse.secure_url as string;
-      }
-    }
+    
 
     const newCourse = await Courses.create({
       courseName,

@@ -6,8 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Courses from "@/database/models/course.schema";
 import User from "@/database/models/user.schema";
 import mongoose from "mongoose"; 
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import cloudinary from "@/lib/cloudniary";
 export async function createEnrollment(request: Request) {
     try {
       await dbConnect();
@@ -21,16 +20,27 @@ export async function createEnrollment(request: Request) {
         enrollmentStatus = EnrollmentStatus.PENDING;
       }
       let paymentVerificationPath = "";
-      if (file) {
-        const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        await mkdir(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, filename);
-        const bytes = await file.arrayBuffer();
-        await writeFile(filePath, Buffer.from(bytes));
-        paymentVerificationPath = `/uploads/${filename}`;
-      }
-  
+       if (file) {
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+            const uploadResponse = await new Promise((resolve, reject) => {
+              cloudinary.uploader.upload_stream(
+                {
+                  folder: "payments",
+                  resource_type: "image", 
+                  allowed_formats: ["jpg", "jpeg", "png", "webp"], 
+                },
+                (error, result) => {
+                  if (error) reject(error);
+                  else resolve(result);
+                }
+              ).end(buffer);
+            });
+      
+            if (uploadResponse && typeof uploadResponse === "object" && "secure_url" in uploadResponse) {
+              paymentVerificationPath = uploadResponse.secure_url as string;
+            }
+          }
       const enrollment = await Enrollment.create({
         student,
         course,

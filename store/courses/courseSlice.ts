@@ -20,8 +20,14 @@ const courseSlice =createSlice({
         setCourse(state,action){
             state.courses = action.payload;
         },addCourses(state, action) {
-            console.log('Adding course:', action.payload);  // Log for debugging
-            state.courses.push(action.payload);
+            const courseToAdd = action.payload;
+                        const exists = state.courses.some(course => 
+                course._id === courseToAdd._id
+            );
+            
+            if (!exists) {
+                state.courses.push(courseToAdd);
+            }
         },resetStatus(state){
             state.status = Status.LOADING;
         },updateCoursesInState(state, action) {
@@ -73,13 +79,10 @@ export function createCourse(data: FormData) {
                 }
             }); 
             if (response.status === 200) {
-                dispatch(setStatus(Status.SUCCESS));
                 if (response.data && response.data.data) {
                     dispatch(addCourses(response.data.data));
-                } else {
-                    console.error('Invalid response structure', response.data);
-                    dispatch(setStatus(Status.ERROR));
-                }            } else {
+                    dispatch(setStatus(Status.SUCCESS));
+                }} else {
                 dispatch(setStatus(Status.ERROR));
             }
         } catch (err) {
