@@ -1,18 +1,17 @@
 import { deleteCategory, updateCategory } from "../category.controller";
-import { use } from "react";
 
-export   function PATCH(
+export  async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = use(params);
+    const { id } = await params; 
     return updateCategory(id, request);
 }
 
-export  function DELETE(
+export async function DELETE(
     request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> }  
 ) {
-    const { id } =  use(params);
+    const { id } = await params; 
     return deleteCategory(id, request);
 }

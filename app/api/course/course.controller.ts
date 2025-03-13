@@ -8,6 +8,7 @@ import Category from "@/database/models/category.schema";
 import User from "@/database/models/user.schema";
 import dbConnect from "@/database/connection";
 import { authMiddleware } from "@/middleware/auth.middleware";
+import cloudinary from "@/lib/cloudniary";
 
 export async function createCourse(request: Request) {
   try {
@@ -30,13 +31,25 @@ export async function createCourse(request: Request) {
     
     let thumbnailPath = "";
     if (file) {
-      const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, filename);
       const bytes = await file.arrayBuffer();
-      await writeFile(filePath, Buffer.from(bytes));
-      thumbnailPath = `/uploads/${filename}`;
+      const buffer = Buffer.from(bytes);
+      const uploadResponse = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            folder: "courses",
+            resource_type: "image", 
+            allowed_formats: ["jpg", "jpeg", "png", "webp"], 
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(buffer);
+      });
+
+      if (uploadResponse && typeof uploadResponse === "object" && "secure_url" in uploadResponse) {
+        thumbnailPath = uploadResponse.secure_url as string;
+      }
     }
 
     const newCourse = await Courses.create({

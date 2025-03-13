@@ -1,26 +1,25 @@
 import { changeEnrollmentStatus, deleteEnrollment, fetchEnrollment } from "../enrollement.controller";
-import {use} from 'react';
 
-export  function GET(
+export  async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } =  use(params);
+    const { id } = await params; 
     return fetchEnrollment(request,id);
 }
 
-export  function DELETE(
+export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } =  use(params);
+    const { id } = await params; 
     return deleteEnrollment(id, request);
 
 }
-export  function PATCH(request:Request,    
+export async function PATCH(request:Request,    
     { params }: { params: Promise<{ id: string }> }
 ){
 
-    const {id} =  use(params)
+    const { id } = await params; 
     return changeEnrollmentStatus(request,id)
 }

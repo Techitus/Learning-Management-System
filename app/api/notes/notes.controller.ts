@@ -1,52 +1,81 @@
 import dbConnect from "@/database/connection";
 import { authMiddleware } from "@/middleware/auth.middleware";
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import { writeFile, mkdir } from "fs/promises";
 import Notes from "@/database/models/notes.schema";
 import mongoose from "mongoose";
+import cloudinary from "@/lib/cloudniary";
 
 export async function createNotes(request: Request) {
-    try {
-      await dbConnect();
-      const authResponse =  await authMiddleware(request as NextRequest)
-      if(!authResponse){
-        return Response.json({
-            message : "You are not authorized to perform this action 😒"
-        },{status:401})
+  try {
+    await dbConnect();
+    const authResponse = await authMiddleware(request as NextRequest);
+    
+    if (!authResponse) {
+      return NextResponse.json(
+        { message: "You are not authorized to perform this action 😒" },
+        { status: 401 }
+      );
     }
-  
-      const formData = await request.formData();
-      const file = formData.get("attachment") as File | null;
-      const course = formData.get("course") ;
 
-      let attachmentPath = "";
-      if (file) {
-        const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        await mkdir(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, filename);
-        const bytes = await file.arrayBuffer();
-        await writeFile(filePath, Buffer.from(bytes));
-        attachmentPath = `/uploads/${filename}`;
-      }
-  
-      const newNotes = await Notes.create({
-        attachment: attachmentPath,
-        course
-      });
-  
+    const formData = await request.formData();
+    const file = formData.get("attachment") as File | null;
+    const course = formData.get("course");
+
+    if (!course) {
       return NextResponse.json(
-        { message: "Notes created successfully 🎉", data: newNotes },
-        { status: 201 }
-      );
-    } catch (error) {
-      return NextResponse.json(
-        { message: "Error creating notes 😢", error: (error as Error).message },
-        { status: 500 }
+        { message: "Course ID is required!" },
+        { status: 400 }
       );
     }
+
+    let attachmentPath = "";
+
+    if (file) {
+      const fileType = file.type; 
+      const allowedFileTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+
+      if (!allowedFileTypes.includes(fileType)) {
+        return NextResponse.json(
+          { message: "Only images (JPG, PNG, WebP) and PDFs are allowed!" },
+          { status: 400 }
+        );
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const uploadResponse = await new Promise<{ secure_url: string }>((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            folder: "notes",
+            resource_type: fileType === "application/pdf" ? "raw" : "image",
+            allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+          },
+          (error, result) => {
+            if (error || !result) reject(error || new Error("Upload failed"));
+            else resolve(result);
+          }
+        ).end(buffer);
+      });
+
+      attachmentPath = uploadResponse.secure_url;
+    }
+
+    const newNotes = await Notes.create({
+      attachment: attachmentPath,
+      course,
+    });
+
+    return NextResponse.json(
+      { message: "Notes created successfully 🎉", data: newNotes },
+      { status: 201 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Error creating notes 😢", error: (error as Error).message },
+      { status: 500 }
+    );
   }
+}
 
   export async function fetchNotes(request:Request) {
     try {

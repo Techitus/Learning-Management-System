@@ -1,18 +1,18 @@
 import { deleteCourse, updateCourse } from "../course.controller";
-import { use } from "react";
 
-export  function PATCH(
+export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } =  use(params);
+    const { id } =  await params;
     return updateCourse(id, request);
 }
 
-export  function DELETE(
+export async function DELETE(
     request: Request,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    const { id } =  use(params);
+    { params }: { params: Promise<{ id: string }> }  
+  ) {
+    const { id } = await params; 
     return deleteCourse(id, request);
-}
+  }
+  

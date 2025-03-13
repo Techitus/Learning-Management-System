@@ -1,10 +1,9 @@
 import dbConnect from "@/database/connection"
 import Lessons from "@/database/models/lesson.schema"
+import cloudinary from "@/lib/cloudniary"
 import { authMiddleware } from "@/middleware/auth.middleware"
-import { mkdir, writeFile } from "fs/promises"
 import mongoose from "mongoose"
 import { NextRequest } from "next/server"
-import path from "path"
 
 
 export async function createLessons(request: Request) {
@@ -20,15 +19,28 @@ export async function createLessons(request: Request) {
       const file = formData.get("videoUrl") as File | null;
       
       let vedioPath = "";
-      if (file && file.name ) {
-        const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        await mkdir(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, filename);
-        const bytes = await file.arrayBuffer();
-        await writeFile(filePath, Buffer.from(bytes));
-        vedioPath = `/uploads/${filename}`;
-      }
+      if (file) {
+           const bytes = await file.arrayBuffer();
+           const buffer = Buffer.from(bytes);
+           const uploadResponse = await new Promise((resolve, reject) => {
+             cloudinary.uploader.upload_stream(
+               {
+                 folder: "lessons",
+                 resource_type: "video", 
+                 allowed_formats: ["mp4", "mov", "avi", "mkv", "webm"], 
+               },
+            
+               (error, result) => {
+                 if (error) reject(error);
+                 else resolve(result);
+               }
+             ).end(buffer);
+           });
+     
+           if (uploadResponse && typeof uploadResponse === "object" && "secure_url" in uploadResponse) {
+             vedioPath = uploadResponse.secure_url as string;
+           }
+         }
   
       const newLesson = await Lessons.create({
         title,
