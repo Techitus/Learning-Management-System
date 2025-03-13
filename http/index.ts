@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-    baseURL : "https://elearn.kamalonweb.com/api", 
+    baseURL : "http://localhost:3000/api", 
     headers : {
         "Content-Type" : "application/json", 
         "Accept" : "application/json"
