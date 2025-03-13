@@ -300,7 +300,6 @@ export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = t
                   <span>{user.email}</span>
                 </div>
                 <div className="flex items-center text-sm">
-                  <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
                   <div className="flex items-center text-sm">
   <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
   {user.mobile ? (
@@ -319,26 +318,7 @@ export default function UserCard({ users, showAdminEnroll=false ,isAdminPage = t
 
                 </div>
               </div>
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold mb-2">Courses:</h3>
-                <div className="flex flex-wrap gap-2">
-                  {user.courses?.map((courseId) => {
-                    const course = courses.find(c => c._id === courseId);
-                    return (
-                      <span 
-                        key={courseId} 
-                        className={`text-xs font-medium px-2.5 py-0.5 rounded ${
-                          selectedCourse === courseId
-                            ? "bg-gray-600 text-blue-50"
-                            : "bg-gray-900 text-blue-100"
-                        }`}
-                      >
-                        {course?.courseName || 'Unknown Course'}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
+             
             </div>
           </div>
         ))}
