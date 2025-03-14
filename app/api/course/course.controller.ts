@@ -29,7 +29,7 @@ export async function createCourse(request: Request) {
     const mentor = new mongoose.Types.ObjectId(formData.get("mentor") as string);
     const file = formData.get("thumbnail") as File | null;
     
-    let thumbnailPath = "";
+    const thumbnailPath = "";
     
 
     const newCourse = await Courses.create({
