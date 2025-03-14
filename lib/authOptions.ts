@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import dbConnect from "@/database/connection";
 import User, { Role } from "@/database/models/user.schema";
-import  { AuthOptions, Session } from "next-auth";
+import  { AuthOptions,  } from "next-auth";
 import { } from "next-auth";
 import GoogleProvider from "next-auth/providers/google"
 
@@ -48,14 +48,16 @@ export const authOptions:AuthOptions = {
         return token 
       },
       //@ts-ignore
-       async session({session,token}:{session:Session,token:IToken}){
-           if(token){
-            session.user.id = token.id; 
-            session.user.role = token.role as Role
-           }
-          
-           return session;
-        
+      async session({ session, token }) {
+        if (token) {
+          session.user = {
+            ...session.user, 
+            id: token.id, 
+            role: token.role || Role.Student
+          };
         }
+        return session;
+      }
+      
     }
 }
