@@ -8,7 +8,7 @@ interface SessionWrapperProps {
 
 const SessionWrapper = ({ children }: SessionWrapperProps) => {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
       {children}
     </SessionProvider>
   );

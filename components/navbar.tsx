@@ -15,12 +15,17 @@ import { Input } from "./ui/input";
 
 import GlobalSearch from "./global-search";
 
-export default function Navbar() {
+export default function Navbar({ forceAuthCheck = false }: { forceAuthCheck?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status,update } = useSession();
   
   const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    if (forceAuthCheck && status === "authenticated") {
+      update();
+    }
+  }, [forceAuthCheck, status, update]);
   
   useEffect(() => {
     setMounted(true);
