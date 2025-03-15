@@ -7,6 +7,7 @@ import GoogleProvider from "next-auth/providers/google"
 
 interface IToken{name : string,email:string,picture:string,sub:string,id:string,role:string}
 export const authOptions:AuthOptions = {
+  debug: true,
     providers : [
         GoogleProvider({
             clientId : process.env.GOOGLE_CLIENT_ID as string, 
@@ -14,6 +15,9 @@ export const authOptions:AuthOptions = {
         }), 
     ], 
     secret : process.env.NEXTAUTH_SECRET,
+    session: {
+      strategy: "jwt", 
+  },
     callbacks : {
         //@ts-ignore
        async signIn({user}:{user : {name : string, email : string, image : string}}) : Promise<boolean>{
@@ -40,7 +44,6 @@ export const authOptions:AuthOptions = {
         const user = await User.findOne({
             email : token.email
         })
-        console.log(user,"USER")
         if(user){
             token.id = user._id
             token.role = user.role

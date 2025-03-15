@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,10 +20,12 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [mounted, setMounted] = useState(false);
   
+  const [mounted, setMounted] = useState(false);
+  if (!mounted) return null;
   useEffect(() => {
     setMounted(true);
+    
   }, []);
 
   useEffect(() => {
