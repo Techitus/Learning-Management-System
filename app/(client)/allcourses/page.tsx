@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
-import CourseList from "@/app/(dashboard)/teacher/mycourses/page";
+import CourseList from "@/components/course-list";
 import Navbar from "@/components/navbar";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";

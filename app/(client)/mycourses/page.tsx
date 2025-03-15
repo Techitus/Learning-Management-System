@@ -1,4 +1,4 @@
-import CourseList from '@/app/(dashboard)/teacher/mycourses/page'
+import CourseList from '@/components/course-list'
 import Navbar from '@/components/navbar'
 
 const page = () => {
