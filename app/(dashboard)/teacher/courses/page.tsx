@@ -1,5 +1,5 @@
+import CourseList from '@/components/course-list'
 import React from 'react'
-import CourseList from '../mycourses/page'
 
 const page = () => {
   return (
