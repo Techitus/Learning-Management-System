@@ -66,7 +66,8 @@ type CoursesTeacherProps = {
   showStudentCourses?: boolean;
   showTeacherCourses?: boolean;
 };
- function CourseList({ showBuyButton = false, routePrefix='courses' ,disableNavigation = false, showStudentCourses=false,showTeacherCourses=true}: CoursesTeacherProps) {
+
+export default function CourseList({ showBuyButton = false, routePrefix='courses' ,disableNavigation = false, showStudentCourses=false,showTeacherCourses=true}: CoursesTeacherProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [priceSort, setPriceSort] = useState<"asc" | "desc" | "none">("none");
   const dispatch = useAppDispatch();
@@ -424,4 +425,3 @@ const coursesToShow = showStudentCourses ? enrolledCourses: showTeacherCourses? 
   );
 }
 
-export default CourseList;
