@@ -6,16 +6,13 @@ import Navbar from "@/components/navbar";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-// In allcourses/page.js
 const page = () => {
   const { data: session, status, update } = useSession();
   const [isSessionVerified, setIsSessionVerified] = useState(false);
   
   useEffect(() => {
-    // Verify session on mount and page focus
     const verifySession = async () => {
       if (status === "authenticated") {
-        // Force session refresh without the prop
         update();
         setIsSessionVerified(true);
       }
