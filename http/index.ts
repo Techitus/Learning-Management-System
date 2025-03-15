@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-    baseURL : "https://elearn.kamalonweb.com/api", 
+    baseURL : "https://elearnnnepal.vercel.app/api", 
     headers : {
         "Content-Type" : "application/json", 
         "Accept" : "application/json"
