@@ -17,7 +17,9 @@ const Courses = () => {
     <section className="container space-y-16 py-24 md:py-32">
         <div>
         <div className="mx-auto max-w-[58rem] text-center">
-        <h2 className="font-bold text-2xl sm:text-3xl md:text-5xl leading-[1.1]">Trending Courses</h2>
+          
+            <h2 className="font-bold text-2xl sm:text-3xl md:text-5xl leading-[1.1]">Trending Courses</h2>
+
       </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
         {filteredCourses.length > 0 ? filteredCourses.map((course) => (

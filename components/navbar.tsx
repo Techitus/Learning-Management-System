@@ -52,6 +52,8 @@ export default function Navbar({ forceAuthCheck = false }: { forceAuthCheck?: bo
                 router.push("/admin");
               } else if (data.role ===Role.Teacher) {
                 router.push("/teacher");
+              }else if (data.role === Role.Student) {
+                router.push("/student");
               }
             }
           }
@@ -72,6 +74,8 @@ export default function Navbar({ forceAuthCheck = false }: { forceAuthCheck?: bo
         router.push("/admin");
       } else if (userRole === Role.Teacher) {
         router.push("/teacher");
+      }else if (userRole === Role.Student) {
+        router.push("/student");
       }
     }
   }, [session, status, router]);
@@ -156,12 +160,10 @@ export default function Navbar({ forceAuthCheck = false }: { forceAuthCheck?: bo
           <GlobalSearch />
 
           <nav className="flex space-x-6 text-sm font-medium ml-20">
-            <Link href="/allcourses" className="transition-colors hover:text-primary">
-              All Courses
-            </Link>
-            <Link href="/mycourses" className="transition-colors hover:text-primary">
-              My Courses
-            </Link>
+            <Link href="/" className="transition-colors hover:text-primary">
+About Us            </Link>
+            <Link href="/" className="transition-colors hover:text-primary">
+Our Journey            </Link>
             
           </nav>
         </div>
@@ -203,18 +205,18 @@ export default function Navbar({ forceAuthCheck = false }: { forceAuthCheck?: bo
               
               <nav className="flex flex-col p-4 space-y-4 bg-black/60">
                 <Link
-                  href="/allcourses"
+                  href="/"
                   className="transition-colors hover:text-primary"
-                  onClick={() => handleLinkClick("/allcourses")}
+                  onClick={() => handleLinkClick("/")}
                 >
-                  All Courses
+                  About Us
                 </Link>
                 <Link
-                  href="/mycourses"
+                  href="/"
                   className="transition-colors hover:text-primary"
-                  onClick={() => handleLinkClick("/mycourses")}
+                  onClick={() => handleLinkClick("/")}
                 >
-                  My Courses
+                  Our Journey
                 </Link>
                 
                 {mounted && session && (

@@ -1,4 +1,3 @@
-"use client";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
@@ -11,7 +10,7 @@ type Notification = {
   avatar: string;
   isImage: boolean;
   message: JSX.Element;
-  time?: string; 
+  time?: string;
 };
 
 export default function Notifications() {
@@ -81,7 +80,7 @@ export default function Notifications() {
           New category <span className="text-purple-400">{category.name}</span> added
         </>
       ),
-      time: formatTime(category.createdAt || new Date().toISOString()), 
+      time: formatTime(category.createdAt || new Date().toISOString()),
     })),
     ...notes.map((note) => ({
       avatar: getInitials(note.attachment),
@@ -92,17 +91,18 @@ export default function Notifications() {
         </>
       ),
     })),
-  ]
-    .slice(0, 5);
+  ];
+
+  const latestNotifications = notifications.slice(0, 5);
 
   return (
     <Card className="bg-black text-white border-zinc-800 h-full max-h-[50vh] md:h-[35vh] 2xl:h-[40vh] overflow-y-auto">
       <CardHeader>
         <CardTitle className="text-lg font-medium">Notifications</CardTitle>
-        <p className="text-sm text-zinc-400">{notifications.length} unread notifications</p>
+        <p className="text-sm text-zinc-400">{latestNotifications.length} unread notifications</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {notifications.map((notification, index) => (
+        {latestNotifications.map((notification, index) => (
           <div key={index} className="flex items-center space-x-4">
             <Avatar className="h-9 w-9 border border-zinc-700 bg-zinc-700 text-white flex items-center justify-center font-bold">
               {notification.isImage ? (

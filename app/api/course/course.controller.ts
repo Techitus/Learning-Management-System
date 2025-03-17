@@ -13,44 +13,73 @@ import cloudinary from "@/lib/cloudniary";
 export async function createCourse(request: Request) {
   try {
     await dbConnect();
-    const authResponse =  await authMiddleware(request as NextRequest)
-    if(!authResponse){
-      return Response.json({
-          message : "You are not authorized to perform this action 😒"
-      },{status:401})
-  }
+
+    const authResponse = await authMiddleware(request as NextRequest);
+    if (!authResponse) {
+      return NextResponse.json(
+        { message: "You are not authorized to perform this action 😒" },
+        { status: 401 }
+      );
+    }
 
     const formData = await request.formData();
     const courseName = formData.get("courseName") as string;
     const courseDescription = formData.get("courseDescription") as string;
-    const coursePrice = parseFloat(formData.get("coursePrice") as string);
+    const coursePriceStr = formData.get("coursePrice") as string;
     const courseDuration = formData.get("courseDuration") as string;
-    const category = new mongoose.Types.ObjectId(formData.get("category") as string);
-    const mentor = new mongoose.Types.ObjectId(formData.get("mentor") as string);
-    const file = formData.get("thumbnail") as File | null;
-    
-    let thumbnailPath = "";
-    if (file) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const uploadResponse = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          {
-            folder: "courses",
-            resource_type: "image", 
-            allowed_formats: ["jpg", "jpeg", "png", "webp"], 
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(buffer);
-      });
+    const categoryId = formData.get("category") as string;
+    const mentorId = formData.get("mentor") as string;
 
-      if (uploadResponse && typeof uploadResponse === "object" && "secure_url" in uploadResponse) {
-        thumbnailPath = uploadResponse.secure_url as string;
+    if (!courseName || !courseDescription || !coursePriceStr || !courseDuration || !categoryId || !mentorId) {
+      return NextResponse.json(
+        { message: "All fields are required!" },
+        { status: 400 }
+      );
+    }
+
+    const coursePrice = parseFloat(coursePriceStr);
+    if (isNaN(coursePrice) || coursePrice < 0) {
+      return NextResponse.json(
+        { message: "Invalid course price!" },
+        { status: 400 }
+      );
+    }
+
+    const category = new mongoose.Types.ObjectId(categoryId);
+    const mentor = new mongoose.Types.ObjectId(mentorId);
+
+    
+
+    let thumbnailPath = "";
+    const file = formData.get("thumbnail") as File | null;
+    if (file) {
+      try {
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const uploadResponse = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            {
+              folder: "courses",
+              resource_type: "image",
+              allowed_formats: ["jpg", "jpeg", "png", "webp"],
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(buffer);
+        });
+
+        if (uploadResponse && typeof uploadResponse === "object" && "secure_url" in uploadResponse) {
+          thumbnailPath = uploadResponse.secure_url as string;
+        }
+      } catch (uploadError) {
+        return NextResponse.json(
+          { message: "Error uploading thumbnail 😢", error: (uploadError as Error).message },
+          { status: 500 }
+        );
       }
-    }    
+    }
 
     const newCourse = await Courses.create({
       courseName,

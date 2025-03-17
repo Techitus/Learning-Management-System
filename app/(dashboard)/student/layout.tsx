@@ -1,26 +1,26 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
+import { StudentDashboardLayout } from '@/components/layout/student-dashboard-layout';
 import { Role } from '@/database/models/user.schema';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import RootLayout from '../layout';
 import { ClockLoader } from 'react-spinners';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
- const {data:session,status}= useSession()
- const router = useRouter()
- useEffect(()=>{
-    if(status === 'loading'){
-      return;
-    }if(!session || session.user.role !== Role.Student){
-     
-      router.push('/unauthorized')
-
-    }
-
- },[session,status])
- if(status === 'loading' || status === 'unauthenticated' )  return (
+  const {data:session,status}= useSession()
+   const router = useRouter()
+   useEffect(()=>{
+      if(status === 'loading'){
+        return;
+      }if(!session || session.user.role !== Role.Student){
+       
+        router.push('/unauthorized')
+  
+      }
+  
+   },[session,status])
+   if(status === 'loading' || status === 'unauthenticated' ) return (
     <div>
 <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
         <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-green-500/10 blur-[100px]" />
@@ -30,5 +30,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </div>
     </div>
   );
- return <RootLayout>{children}</RootLayout>;
+  return <StudentDashboardLayout>{children}</StudentDashboardLayout>;
 }

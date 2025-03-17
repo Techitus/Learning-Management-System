@@ -44,17 +44,22 @@ import { EnrollmentStatus } from "@/database/models/enrolement.schema"
 import { StatusSelection } from "./ui/status-selection"
 import toast, { Toaster } from "react-hot-toast"
 import { Status } from "@/types/status.types"
+import { useSession } from "next-auth/react"
 
-export function EnrollmentTable() {
+type EnrollmentTableProps ={
+    isAdmin? : boolean
+}
+export function EnrollmentTable({isAdmin = true}: EnrollmentTableProps){
   const [selectedEnrollment, setSelectedEnrollment] = useState<typeof enrollments[0] | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isPaymentPreviewOpen, setIsPaymentPreviewOpen] = useState(false)
   const [actionType, setActionType] = useState<"deleted" | "changed" | null>(null)
-
+const {data:session} = useSession()
   const { enrollments, status } = useAppSelector((state) => state.enrollments) 
   const dispatch = useAppDispatch()
-  
+  const filteredEnrollments = isAdmin ? enrollments : enrollments?.filter(enrollment => enrollment.student._id === session?.user?.id);
+
   useEffect(() => {
     dispatch(fetchEnrollments())
   }, [dispatch])
@@ -129,11 +134,14 @@ export function EnrollmentTable() {
               <TableHead className="hidden xl:table-cell">Enrollment Date</TableHead>
               <TableHead className="hidden md:table-cell">Amount</TableHead>
               <TableHead className="hidden md:table-cell">Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+             
+                  <TableHead className="text-right">Actions</TableHead>
+                
+              
             </TableRow>
           </TableHeader>
           <TableBody>
-            {enrollments?.map((enrollment) => enrollment?.student && (
+            {filteredEnrollments?.map((enrollment) => enrollment?.student && (
               <TableRow key={enrollment._id}>
                 <TableCell>
                   <Avatar>
@@ -156,9 +164,11 @@ export function EnrollmentTable() {
                 <TableCell className="hidden md:table-cell">
                   {getStatusBadge(enrollment.enrollmentStatus)}
                 </TableCell>
+                
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1 md:gap-2">
-                   
+                  {
+      isAdmin && (
                     <Button
                       variant="outline"
                       size="icon"
@@ -167,15 +177,19 @@ export function EnrollmentTable() {
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
+                )}
                     <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => openPreview(enrollment)}
-                      title="Preview enrollment details"
-                      className="hidden md:flex"
-                    >
+  variant="outline"
+  size="icon"
+  onClick={() => openPreview(enrollment)}
+  title="Preview enrollment details"
+  className={`${isAdmin ? 'hidden' : 'flex'} md:flex`}
+>
+
                       <CheckCircle className="h-4 w-4" />
                     </Button>
+                    {
+      isAdmin && (
                     <Button
                       variant="outline"
                       size="icon"
@@ -185,17 +199,22 @@ export function EnrollmentTable() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    )}
                   </div>
                 </TableCell>
+      
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+      
+     
+     
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         {selectedEnrollment && (
-          <DialogContent className="w-[95vw] max-w-md mx-auto sm:h-auto h-[80vh] sm:max-h-none max-h-full overflow-hidden">
+          <DialogContent className="xl:w-[95vw] w-[80%] max-w-md mx-auto sm:h-auto h-[80vh] sm:max-h-none max-h-full overflow-hidden">
             <DialogHeader>
               <DialogTitle>Enrollment Details</DialogTitle>
               <DialogDescription>
@@ -243,7 +262,9 @@ export function EnrollmentTable() {
           </DialogContent>
         )}
       </Dialog>
-
+      {
+      isAdmin && (
+        <div>
       <Dialog open={isPaymentPreviewOpen} onOpenChange={setIsPaymentPreviewOpen}>
         {selectedEnrollment && (
           <DialogContent className="w-[95vw] sm:max-w-xl md:max-w-2xl mx-auto sm:h-auto h-[95vh] sm:max-h-none max-h-full overflow-hidden">
@@ -293,11 +314,12 @@ export function EnrollmentTable() {
                   <p className="text-xs md:text-sm font-medium text-white">Status:</p>
                   <div>{getStatusBadge(selectedEnrollment.enrollmentStatus)}</div>
                 </div>
-                
+               
                 <div className="mt-2 md:mt-4">
                   <p className="text-xs md:text-sm font-medium text-white mb-1 md:mb-2">Change Verification Status:</p>
                   <StatusSelection handleClick={(status: EnrollmentStatus) => handleChangeStatus(status, selectedEnrollment?._id || "")} />
                 </div>
+              
               </div>
             </div>
           </div>
@@ -310,7 +332,7 @@ export function EnrollmentTable() {
         </DialogContent>
         )}
       </Dialog>
-
+      
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="w-[95vw] max-w-md mx-auto h-auto max-h-[80vh] overflow-y-auto">
           <AlertDialogHeader>
@@ -339,6 +361,9 @@ export function EnrollmentTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      </div>
+    )}
       <Toaster position="bottom-right" reverseOrder={false} />
     </>
   )
